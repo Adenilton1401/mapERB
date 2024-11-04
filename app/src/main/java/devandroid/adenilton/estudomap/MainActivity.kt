@@ -81,7 +81,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
        // drawSectorPolygon(minhaLocalizacao, azimute)
         try {
             val centerLocation = LatLng(-25.505476, -49.308461)
-            val azimuth = 45.0
+            val azimuth = 30.0
 
             Log.d("MapDebug", "Iniciando desenho do poligono")
             drawSectorPolygon(centerLocation, azimuth)
