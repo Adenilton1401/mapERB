@@ -6,25 +6,47 @@ import devandroid.adenilton.estudomap.model.SectorPolygon
 
 class MapViewModel : ViewModel() {
 
-    private val centerLocation = LatLng(-25.505476, -49.308461)
-    private val azimuth = 30.0
-    private val radiusInMeters = 3000.0
+    private var centerLocation: LatLng = LatLng(-25.505476,-49.308400)
+    private var  azimuth: Double = 30.0
+    private var radiusInMeters: Double = 3000.0
     private val angleInDegrees = 30.0
     private val numberOfPoints = 60
 
-    private val sectorPolygon = SectorPolygon(
-        centerLocation,
-        radiusInMeters,
-        azimuth,
-        angleInDegrees,
-        numberOfPoints
-    )
+
+    private var sectorPolygon: SectorPolygon? = null
+
+    private fun updateSectorPolygon(){
+       sectorPolygon = SectorPolygon(
+            centerLocation,
+            radiusInMeters,
+            azimuth,
+            angleInDegrees,
+            numberOfPoints
+        )
+
+    }
 
     fun getSectorPolygonPoints(): List<LatLng> {
-        return sectorPolygon.getPolygonPoints()
+        return sectorPolygon?.getPolygonPoints() ?: emptyList()
+    }
+
+    fun setCenterLocation(latLng: LatLng){
+        this.centerLocation = latLng
+        updateSectorPolygon()
     }
 
     fun getCenterLocation(): LatLng {
         return centerLocation
     }
+
+    fun setAzimuth(azimuth:Double){
+        this.azimuth = azimuth
+        updateSectorPolygon()
+    }
+
+    fun setRadiusInMeters (radiusInMeters: Double){
+        this.radiusInMeters = radiusInMeters
+        updateSectorPolygon()
+    }
+
 }

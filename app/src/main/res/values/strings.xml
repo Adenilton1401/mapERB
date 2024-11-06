@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">EstudoMap</string>
+    <string name="longitude">Longitude</string>
+    <string name="azimute">Azimute</string>
+    <string name="raio">Raio em metros</string>
+    <string name="latitude">Latitude</string>
 </resources>

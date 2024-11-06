@@ -17,6 +17,9 @@ import com.google.android.gms.maps.model.PolygonOptions
 import devandroid.adenilton.estudomap.R
 import devandroid.adenilton.estudomap.viewmodel.MapViewModel
 import androidx.lifecycle.ViewModel
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.textfield.TextInputEditText
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mapView: MapView
@@ -53,6 +56,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         Log.d("MapViewSequence", " onCreate finalizado")
 
 
+
     }
 
     override fun onMapReady(map: GoogleMap) {
@@ -69,16 +73,63 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
             }
 
-        try {
-            val polygonPoints = mapViewModel.getSectorPolygonPoints()
-            drawSectorPolygon(polygonPoints)
+        val initLatLng = LatLng(-15.842070765433535, -47.881240647210184)
 
-            val cameraUpdate = CameraUpdateFactory.newLatLngZoom(mapViewModel.getCenterLocation(), 13.5f)
-            googleMap.animateCamera(cameraUpdate)
+        val cameraUpdate = CameraUpdateFactory.newLatLngZoom(initLatLng, 5f)
+        googleMap.animateCamera(cameraUpdate)
+
+        try {
+
+            val fab = findViewById<FloatingActionButton>(R.id.fbtnAddAPolygon)
+            fab.setOnClickListener{
+                showDialogAddPolygon()
+            }
+
 
         } catch (e: Exception) {
             Log.e("MapDebug", "Erro no onMapReady", e)
         }
+    }
+
+    private fun showDialogAddPolygon(){
+        val builder = MaterialAlertDialogBuilder(this)
+        val view =layoutInflater.inflate(R.layout.dialog_add_polygon, null)
+        builder.setView(view)
+
+        val etLat = view.findViewById<TextInputEditText>(R.id.etLatitude)
+        val etLng = view.findViewById<TextInputEditText>(R.id.etLongitude)
+        val etAzimuth = view.findViewById<TextInputEditText>(R.id.etAzimute)
+        val etRadiusInMeters = view.findViewById<TextInputEditText>(R.id.etRaio)
+
+        builder.setPositiveButton("Adicionar"){ dialog, _ ->
+            var lat = etLat.text.toString().toDoubleOrNull() ?:0.0
+            var lng = etLng.text.toString().toDoubleOrNull() ?:0.0
+            var azimuth = etAzimuth.text.toString().toDoubleOrNull() ?:0.0
+            var radiusInMeters = etRadiusInMeters.text.toString().toDoubleOrNull() ?: 0.0
+            var latLng = LatLng(lat,lng)
+
+            mapViewModel.setCenterLocation(latLng)
+            Log.e("MapDebug", "Carregou o CenterLocation com"+latLng)
+            mapViewModel.setAzimuth(azimuth)
+            mapViewModel.setRadiusInMeters(radiusInMeters)
+
+            try {
+
+                var polygonPoints = mapViewModel.getSectorPolygonPoints()
+                drawSectorPolygon(polygonPoints)
+
+                val cameraUpdate = CameraUpdateFactory.newLatLngZoom(mapViewModel.getCenterLocation(), 13.5f)
+                googleMap.animateCamera(cameraUpdate)
+
+            } catch (e: Exception) {
+                Log.e("MapDebug", "Erro no onMapReady", e)
+            }
+
+        }
+
+        builder.setNegativeButton("Cancelar",null)
+        builder.show()
+
     }
 
 
@@ -90,7 +141,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         // Remover polígono anterior se existir
-        sectorPolygon?.remove()
+       // sectorPolygon?.remove()
 
         // Criar as options do polígono
         val polygonOptions = PolygonOptions().apply {
@@ -154,6 +205,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         mapView.onLowMemory()
         Log.d("MapViewLifecycle", "onLowMemory chamado")
     }
+
+
 }
 
 
