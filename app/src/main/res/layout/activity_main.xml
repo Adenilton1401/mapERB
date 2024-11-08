@@ -12,9 +12,9 @@
         android:layout_height="match_parent" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fbtnAddAPolygon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:id="@+id/fbtMenu"
+        android:layout_width="55dp"
+        android:layout_height="56dp"
         android:layout_marginBottom="20dp"
         android:backgroundTint="#ffffff"
         android:clickable="true"
@@ -24,7 +24,56 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.078"
         app:layout_constraintStart_toStartOf="parent"
-        app:srcCompat="@drawable/ic_add" />
+        app:srcCompat="@drawable/ic_menu_38" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fbtAddPolygon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:backgroundTint="#ffffff"
+        android:visibility="invisible"
+        android:clickable="true"
+        app:layout_constraintBottom_toTopOf="@+id/fbtMenu"
+        app:layout_constraintStart_toStartOf="@+id/fbtMenu"
+        app:srcCompat="@drawable/ic_draw_42"
+        />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fbtClerPolygon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:clickable="true"
+        android:backgroundTint="#ffffff"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/fbtAddPolygon"
+        app:layout_constraintStart_toStartOf="@+id/fbtAddPolygon"
+        app:srcCompat="@drawable/ic_clear" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fbtSend"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:clickable="true"
+        android:backgroundTint="#ffffff"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/fbtClerPolygon"
+        app:layout_constraintStart_toStartOf="@+id/fbtClerPolygon"
+        app:srcCompat="@drawable/ic_send" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fbtList"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:clickable="true"
+        android:backgroundTint="#ffffff"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/fbtSend"
+        app:layout_constraintStart_toStartOf="@+id/fbtSend"
+        app:srcCompat="@drawable/ic_list" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
