@@ -4,4 +4,8 @@
     <string name="azimute">Azimute</string>
     <string name="raio">Raio em metros</string>
     <string name="latitude">Latitude</string>
+    <string name="clear">O que gostaria de deletar?</string>
+    <string name="btnCancel">Cancelar</string>
+    <string name="btnAll">Todos</string>
+    <string name="btnLast">Último</string>
 </resources>

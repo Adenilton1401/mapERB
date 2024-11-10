@@ -13,13 +13,15 @@
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fbtMenu"
-        android:layout_width="55dp"
+        android:layout_width="56dp"
         android:layout_height="56dp"
         android:layout_marginBottom="20dp"
         android:backgroundTint="#ffffff"
         android:clickable="true"
         android:focusable="true"
         android:tint="#000000"
+        android:scaleType="center"
+        app:maxImageSize="42dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.078"
@@ -30,49 +32,54 @@
         android:id="@+id/fbtAddPolygon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="12dp"
         android:backgroundTint="#ffffff"
-        android:visibility="invisible"
         android:clickable="true"
+        android:rotation="90"
+        android:scaleType="center"
+        android:visibility="invisible"
         app:layout_constraintBottom_toTopOf="@+id/fbtMenu"
         app:layout_constraintStart_toStartOf="@+id/fbtMenu"
-        app:srcCompat="@drawable/ic_draw_42"
-        />
+        app:maxImageSize="42dp"
+        app:srcCompat="@drawable/ic_draw42" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fbtClerPolygon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:clickable="true"
+        android:layout_marginBottom="8dp"
         android:backgroundTint="#ffffff"
+        android:clickable="true"
         android:visibility="invisible"
         app:layout_constraintBottom_toTopOf="@+id/fbtAddPolygon"
         app:layout_constraintStart_toStartOf="@+id/fbtAddPolygon"
-        app:srcCompat="@drawable/ic_clear" />
+        app:maxImageSize="42dp"
+        app:srcCompat="@drawable/ic_clear_42" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fbtSend"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:clickable="true"
+        android:layout_marginBottom="8dp"
         android:backgroundTint="#ffffff"
+        android:clickable="true"
         android:visibility="invisible"
         app:layout_constraintBottom_toTopOf="@+id/fbtClerPolygon"
         app:layout_constraintStart_toStartOf="@+id/fbtClerPolygon"
-        app:srcCompat="@drawable/ic_send" />
+        app:maxImageSize="42dp"
+        app:srcCompat="@drawable/ic_send_42" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fbtList"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:clickable="true"
+        android:layout_marginBottom="8dp"
         android:backgroundTint="#ffffff"
+        android:clickable="true"
         android:visibility="invisible"
         app:layout_constraintBottom_toTopOf="@+id/fbtSend"
         app:layout_constraintStart_toStartOf="@+id/fbtSend"
+        app:maxImageSize="42dp"
         app:srcCompat="@drawable/ic_list" />
 
 

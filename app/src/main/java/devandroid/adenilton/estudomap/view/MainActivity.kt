@@ -14,14 +14,19 @@ import android.graphics.Color
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
+import android.widget.Toast
 import androidx.activity.viewModels
 import com.google.android.gms.maps.model.Polygon
 import com.google.android.gms.maps.model.PolygonOptions
+import com.google.android.material.button.MaterialButton
 import devandroid.adenilton.estudomap.R
 import devandroid.adenilton.estudomap.viewmodel.MapViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
+
+
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -46,6 +51,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var googleMap: GoogleMap
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private var sectorPolygon: Polygon? = null
+
+    //--Variáveis para o controle da lista de poligonos
+    private val polygonsList = mutableListOf<Polygon>()
+    private var cursor: Int = 0
 
     private val mapViewModel : MapViewModel by viewModels()
 
@@ -181,8 +190,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         fbtClerPolygon.setOnClickListener {
-            var polygonPoints = mapViewModel.getSectorPolygonPoints()
-            clearSectorPolygons(polygonPoints)
+            showDialogClear()
         }
     }
 
@@ -223,8 +231,46 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
         }
 
-        builder.setNegativeButton("Cancelar",null)
+                builder.setNegativeButton("Cancelar",null)
         builder.show()
+
+    }
+
+    private fun showDialogClear(){
+        val builder = MaterialAlertDialogBuilder(this)
+        val view =layoutInflater.inflate(R.layout.dialog_clear_polygon, null)
+        builder.setView(view)
+
+        val btnLast = view.findViewById<MaterialButton>(R.id.btnLast)
+        val btnAll = view.findViewById<MaterialButton>(R.id.btnAll)
+        val btnCancel = view.findViewById<MaterialButton>(R.id.btnCancel)
+
+        val dialog = builder.create()
+
+
+        btnLast.setOnClickListener{
+            clearLastSectorPolygon()
+            dialog.dismiss()
+
+        }
+
+        btnAll.setOnClickListener{
+            clearAllSectorPolygon()
+            dialog.dismiss()
+
+        }
+
+        btnCancel.setOnClickListener{
+
+            dialog.cancel()
+
+        }
+
+        builder.setPositiveButton(null,null)
+        builder.setNeutralButton(null,null)
+        builder.setNegativeButton(null,null)
+
+        dialog.show()
 
     }
 
@@ -252,14 +298,28 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
         if (polygon != null) {
             sectorPolygon = polygon
+            polygonsList.add(polygon)
+            cursor++
             Log.d("MapDebug", "Poligono criado com sucesso")
         } else {
             Log.e("MapDebug", "Falha ao criar poligono")
         }
     }
 
-    private fun clearSectorPolygons(sectorPoints: List<LatLng>){
-        sectorPolygon?.remove()
+    private fun clearLastSectorPolygon(){
+        val lastPolygon = polygonsList.removeLastOrNull()
+        lastPolygon?.remove()
+        val rootView = findViewById<View>(android.R.id.content)
+        Snackbar.make(rootView, "ùltimo azimute apagado!", Snackbar.LENGTH_SHORT).show()
+    }
+
+    private fun clearAllSectorPolygon(){
+        for (polygon in polygonsList){
+            polygon.remove()
+        }
+        polygonsList.clear()
+        val rootView = findViewById<View>(android.R.id.content)
+        Snackbar.make(rootView, "Mapa limpo!", Snackbar.LENGTH_SHORT).show()
     }
 
 
