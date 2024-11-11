@@ -1,10 +1,20 @@
 package devandroid.adenilton.estudomap.viewmodel
 
+import android.app.Application
+import android.graphics.Bitmap
+import android.widget.Toast
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
+import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.LatLng
 import devandroid.adenilton.estudomap.model.SectorPolygon
+import java.io.File
+import java.io.FileOutputStream
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
-class MapViewModel : ViewModel() {
+class MapViewModel(application: Application) : AndroidViewModel(application) {
 
     private var centerLocation: LatLng = LatLng(-25.505476,-49.308400)
     private var  azimuth: Double = 30.0
@@ -48,5 +58,26 @@ class MapViewModel : ViewModel() {
         this.radiusInMeters = radiusInMeters
         updateSectorPolygon()
     }
+
+    fun saveMapAsImage (googleMap: GoogleMap){
+        val dataTime = SimpleDateFormat("yyyyMMdd_HHmmss",
+            Locale.getDefault()).format(Date())
+        val fileName = "$dataTime.png"
+
+        googleMap.snapshot { bitmap ->
+            if(bitmap != null){
+                val outputStream = FileOutputStream(File(
+                    getApplication<Application>().getExternalFilesDir(null),fileName))
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+                outputStream.flush()
+                outputStream.close()
+                Toast.makeText(getApplication(), "Mapa salvo como imagem!", Toast.LENGTH_SHORT).show()
+            }else{
+
+            }
+        }
+    }
+
+
 
 }
