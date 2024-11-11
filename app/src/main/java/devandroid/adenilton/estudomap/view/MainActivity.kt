@@ -16,6 +16,7 @@ import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.maps.model.Polygon
 import com.google.android.gms.maps.model.PolygonOptions
 import com.google.android.material.button.MaterialButton
@@ -56,7 +57,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private val polygonsList = mutableListOf<Polygon>()
     private var cursor: Int = 0
 
-    private val mapViewModel : MapViewModel by viewModels()
+    private lateinit var mapViewModel: MapViewModel
 
     // Constantes para permissões
     companion object {
@@ -68,6 +69,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        mapViewModel= ViewModelProvider(this).get(MapViewModel::class.java)
 
         //Inicializa os botões do Menu
         starMenuButtons()
@@ -191,6 +194,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
         fbtClerPolygon.setOnClickListener {
             showDialogClear()
+        }
+
+        fbtSend.setOnClickListener {
+            mapViewModel.saveMapAsImage(googleMap)
         }
     }
 
