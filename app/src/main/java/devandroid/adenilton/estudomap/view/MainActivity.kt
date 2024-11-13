@@ -1,5 +1,8 @@
 package devandroid.adenilton.estudomap.view
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -16,7 +19,13 @@ import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.annotation.DrawableRes
+import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.ViewModelProvider
+import com.google.android.gms.maps.model.BitmapDescriptor
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.Polygon
 import com.google.android.gms.maps.model.PolygonOptions
 import com.google.android.material.button.MaterialButton
@@ -26,6 +35,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
+import devandroid.adenilton.estudomap.utils.Util
 
 
 
@@ -55,7 +65,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     //--Variáveis para o controle da lista de poligonos
     private val polygonsList = mutableListOf<Polygon>()
-    private var cursor: Int = 0
+    private var markersList = mutableListOf<Marker>()
 
     private lateinit var mapViewModel: MapViewModel
 
@@ -212,8 +222,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         val etRadiusInMeters = view.findViewById<TextInputEditText>(R.id.etRaio)
 
         builder.setPositiveButton("Adicionar"){ dialog, _ ->
-            var lat = etLat.text.toString().toDoubleOrNull() ?:0.0
-            var lng = etLng.text.toString().toDoubleOrNull() ?:0.0
+
+
+
+            var lat = Util.convertCoord(etLat.text.toString())
+            var lng = Util.convertCoord(etLng.text.toString())
             var azimuth = etAzimuth.text.toString().toDoubleOrNull() ?:0.0
             var radiusInMeters = etRadiusInMeters.text.toString().toDoubleOrNull() ?: 0.0
             var latLng = LatLng(lat,lng)
@@ -257,6 +270,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
         btnLast.setOnClickListener{
             clearLastSectorPolygon()
+
             dialog.dismiss()
 
         }
@@ -302,11 +316,13 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
         // Adicionar o polígono e verificar
         val polygon = googleMap.addPolygon(polygonOptions)
+        addMarker(mapViewModel.getCenterLocation())
+
 
         if (polygon != null) {
             sectorPolygon = polygon
+
             polygonsList.add(polygon)
-            cursor++
             Log.d("MapDebug", "Poligono criado com sucesso")
         } else {
             Log.e("MapDebug", "Falha ao criar poligono")
@@ -316,8 +332,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun clearLastSectorPolygon(){
         val lastPolygon = polygonsList.removeLastOrNull()
         lastPolygon?.remove()
+        markersList.last().remove()
+        markersList.removeLast()
+
         val rootView = findViewById<View>(android.R.id.content)
-        Snackbar.make(rootView, "ùltimo azimute apagado!", Snackbar.LENGTH_SHORT).show()
+        Snackbar.make(rootView, "último azimute apagado!", Snackbar.LENGTH_SHORT).show()
     }
 
     private fun clearAllSectorPolygon(){
@@ -325,9 +344,41 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
             polygon.remove()
         }
         polygonsList.clear()
+        googleMap.clear()
         val rootView = findViewById<View>(android.R.id.content)
         Snackbar.make(rootView, "Mapa limpo!", Snackbar.LENGTH_SHORT).show()
     }
+
+    //Cria um marcador na localização geografica
+    private fun addMarker(latLng: LatLng) {
+       // val icon = vectorToBitmap(R.drawable.ic_tower_48)
+        val bitmap = BitmapFactory.decodeResource(resources, R.drawable.ic_tower_new)
+        val icon = BitmapDescriptorFactory.fromBitmap(bitmap)
+        val markerOptions = MarkerOptions()
+            .position(latLng)
+            .title("ERB")
+            .snippet("Lat: ${latLng.latitude}, Lng: ${latLng.longitude}")
+            .icon(icon)
+
+        val marcador = googleMap.addMarker(markerOptions)
+        if (marcador != null) {
+            markersList.add(marcador)
+        }
+    }
+
+    //Converte o icone vetor pra bitmap
+    fun vectorToBitmap(@DrawableRes id: Int): BitmapDescriptor {
+        val vectorDrawable = ResourcesCompat.getDrawable(resources, id, null)
+        val bitmap = Bitmap.createBitmap(vectorDrawable!!.intrinsicWidth,
+            vectorDrawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
+
+        val canvas = Canvas(bitmap)
+        vectorDrawable.setBounds(0, 0, canvas.width, canvas.height)
+        vectorDrawable.draw(canvas)
+        return BitmapDescriptorFactory.fromBitmap(bitmap)
+
+    }
+
 
 
 
