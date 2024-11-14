@@ -1,45 +1,44 @@
 package devandroid.adenilton.estudomap.view
 
+import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
+import android.widget.Toast
+import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.res.ResourcesCompat
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.model.LatLng
-import android.graphics.Color
-import android.view.View
-import android.view.animation.Animation
-import android.view.animation.AnimationUtils
-import android.widget.Toast
-import androidx.activity.viewModels
-import androidx.annotation.DrawableRes
-import androidx.core.content.res.ResourcesCompat
-import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.Polygon
 import com.google.android.gms.maps.model.PolygonOptions
 import com.google.android.material.button.MaterialButton
-import devandroid.adenilton.estudomap.R
-import devandroid.adenilton.estudomap.viewmodel.MapViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
+import devandroid.adenilton.estudomap.R
 import devandroid.adenilton.estudomap.utils.Util
+import devandroid.adenilton.estudomap.viewmodel.MapViewModel
 
 
-
-class MainActivity : AppCompatActivity(), OnMapReadyCallback {
+class MainActivity : AppCompatActivity(), OnMapReadyCallback, DialogFragmentAddPolygon.OnDataSendedListener {
 
     //Inicio da declaração de variáveis de botões
     private lateinit var fbtMenu: FloatingActionButton
@@ -194,7 +193,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         try {
 
                 fbtAddPolygon.setOnClickListener{
-                showDialogAddPolygon()
+               // showDialogAddPolygon()
+                    val dialogFragmentAddPolygon = DialogFragmentAddPolygon()
+                    dialogFragmentAddPolygon.show(supportFragmentManager,"DialogFragmentAddPolygon")
             }
 
 
@@ -222,8 +223,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         val etRadiusInMeters = view.findViewById<TextInputEditText>(R.id.etRaio)
 
         builder.setPositiveButton("Adicionar"){ dialog, _ ->
-
-
 
             var lat = Util.convertCoord(etLat.text.toString())
             var lng = Util.convertCoord(etLng.text.toString())
@@ -329,6 +328,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    @SuppressLint("NewApi")
     private fun clearLastSectorPolygon(){
         val lastPolygon = polygonsList.removeLastOrNull()
         lastPolygon?.remove()
@@ -422,6 +422,34 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         super.onLowMemory()
         mapView.onLowMemory()
         Log.d("MapViewLifecycle", "onLowMemory chamado")
+    }
+
+    override fun onDataSended(
+        lat: Double,
+        lng: Double,
+        azimuth: Double,
+        radiusInMeters: Double
+    ) {
+        var latLng = LatLng(lat,lng)
+        onMenuButtonClicked()
+
+        mapViewModel.setCenterLocation(latLng)
+        Log.e("MapDebug", "Carregou o CenterLocation com"+latLng)
+        mapViewModel.setAzimuth(azimuth)
+        mapViewModel.setRadiusInMeters(radiusInMeters)
+
+        try {
+
+            var polygonPoints = mapViewModel.getSectorPolygonPoints()
+            drawSectorPolygon(polygonPoints)
+
+            val cameraUpdate = CameraUpdateFactory.newLatLngZoom(mapViewModel.getCenterLocation(), 13.5f)
+            googleMap.animateCamera(cameraUpdate)
+
+        } catch (e: Exception) {
+            Log.e("MapDebug", "Erro no onMapReady", e)
+        }
+
     }
 
 

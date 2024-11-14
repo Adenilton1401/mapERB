@@ -9,6 +9,7 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.LatLng
@@ -108,5 +109,37 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+
+    companion object{
+        fun checkAzimuth (azimuthStg: String): Boolean {
+            if (azimuthStg.toDouble() >= 0.0 && azimuthStg.toDouble()<=360){
+                return false
+            }else
+                return true
+
+
+        }
+
+        fun checkLat (latStg: String): Boolean {
+            if (latStg.toDouble() >= -90.0 && latStg.toDouble()<=90){
+                return false
+            }else
+                return true
+
+
+        }
+
+        fun checkLng (lngStg: String): Boolean {
+            if (lngStg.toDouble() >= -180.0 && lngStg.toDouble()<=180){
+                return false
+            }else
+                return true
+
+
+        }
+
+    }
+
+
 
 }
