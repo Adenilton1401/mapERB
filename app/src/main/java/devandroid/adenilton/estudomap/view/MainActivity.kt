@@ -11,6 +11,7 @@ import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
@@ -38,7 +39,8 @@ import devandroid.adenilton.estudomap.utils.Util
 import devandroid.adenilton.estudomap.viewmodel.MapViewModel
 
 
-class MainActivity : AppCompatActivity(), OnMapReadyCallback, DialogFragmentAddPolygon.OnDataSendedListener {
+class MainActivity : AppCompatActivity(), OnMapReadyCallback,
+    DialogFragmentAddPolygon.OnDataSendedListener {
 
     //Inicio da declaração de variáveis de botões
     private lateinit var fbtMenu: FloatingActionButton
@@ -49,10 +51,30 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, DialogFragmentAddP
     //Fim da declaração de variáveis de botões
 
     // Inicio da declaração de variáveis de animação dos botões
-    private val rotateOpen: Animation by lazy { AnimationUtils.loadAnimation(this, R.anim.rotate_open_anim) }
-    private val rotateClose: Animation by lazy { AnimationUtils.loadAnimation(this, R.anim.rotate_close_anim) }
-    private val fromBotton: Animation by lazy { AnimationUtils.loadAnimation(this, R.anim.from_botton_anim) }
-    private val toBotton: Animation by lazy { AnimationUtils.loadAnimation(this, R.anim.to_botton_anim) }
+    private val rotateOpen: Animation by lazy {
+        AnimationUtils.loadAnimation(
+            this,
+            R.anim.rotate_open_anim
+        )
+    }
+    private val rotateClose: Animation by lazy {
+        AnimationUtils.loadAnimation(
+            this,
+            R.anim.rotate_close_anim
+        )
+    }
+    private val fromBotton: Animation by lazy {
+        AnimationUtils.loadAnimation(
+            this,
+            R.anim.from_botton_anim
+        )
+    }
+    private val toBotton: Animation by lazy {
+        AnimationUtils.loadAnimation(
+            this,
+            R.anim.to_botton_anim
+        )
+    }
 
     private var clicked = false
     // Fim da ddeclaração de variáveis de animação dos botões
@@ -79,14 +101,24 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, DialogFragmentAddP
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        mapViewModel= ViewModelProvider(this).get(MapViewModel::class.java)
+        mapViewModel = ViewModelProvider(this).get(MapViewModel::class.java)
+
 
         //Inicializa os botões do Menu
         starMenuButtons()
 
+
         //Definição do envento do botão do menu
         fbtMenu.setOnClickListener {
             onMenuButtonClicked()
+        }
+        if (savedInstanceState != null) {
+            clicked = savedInstanceState.getBoolean("menu_state", false)
+            clicked = !clicked
+            setVisibility(clicked)
+            setAnimation(clicked)
+            setClickable(clicked)
+            clicked = !clicked
         }
 
         // Inicializar o cliente de localização
@@ -103,6 +135,25 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, DialogFragmentAddP
 
         Log.d("MapViewSequence", " onCreate finalizado")
 
+        // Configurar o OnBackPressedDispatcher
+        val onBackPressedDispatcher = this.onBackPressedDispatcher
+        val callback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if(clicked){
+                    onMenuButtonClicked()
+                }else {
+                    MaterialAlertDialogBuilder(this@MainActivity)
+                        .setTitle("Fechar o app?")
+                        .setMessage("Tem certeza que deseja sair?")
+                        .setPositiveButton("Sim") { _, _ ->
+                            finish()
+                        }
+                        .setNegativeButton("Não", null)
+                        .show()
+                }
+            }
+        }
+        onBackPressedDispatcher.addCallback(this, callback)
 
 
     }
@@ -115,6 +166,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, DialogFragmentAddP
         fbtSend = findViewById<FloatingActionButton>(R.id.fbtSend)
         fbtList = findViewById<FloatingActionButton>(R.id.fbtList)
 
+
     }
 
     private fun onMenuButtonClicked() {
@@ -126,12 +178,12 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, DialogFragmentAddP
     }
 
     private fun setVisibility(clicked: Boolean) {
-        if(!clicked){
+        if (!clicked) {
             fbtAddPolygon.visibility = View.VISIBLE
             fbtClerPolygon.visibility = View.VISIBLE
             fbtSend.visibility = View.VISIBLE
             fbtList.visibility = View.VISIBLE
-        }else{
+        } else {
             fbtAddPolygon.visibility = View.INVISIBLE
             fbtClerPolygon.visibility = View.INVISIBLE
             fbtSend.visibility = View.INVISIBLE
@@ -140,36 +192,36 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, DialogFragmentAddP
     }
 
     private fun setAnimation(clicked: Boolean) {
-        if (!clicked){
+        if (!clicked) {
             fbtAddPolygon.startAnimation(fromBotton)
             fbtClerPolygon.startAnimation(fromBotton)
             fbtSend.startAnimation(fromBotton)
             fbtList.startAnimation(fromBotton)
             fbtMenu.startAnimation(rotateOpen)
-        }else{
+        } else {
             fbtAddPolygon.startAnimation(toBotton)
             fbtClerPolygon.startAnimation(toBotton)
             fbtSend.startAnimation(toBotton)
             fbtList.startAnimation(toBotton)
             fbtMenu.startAnimation(rotateClose)
         }
+
     }
 
-    private fun setClickable(clicked: Boolean){
-        if (!clicked){
+    private fun setClickable(clicked: Boolean) {
+        if (!clicked) {
             fbtAddPolygon.isClickable = true
             fbtClerPolygon.isClickable = true
             fbtSend.isClickable = true
             fbtList.isClickable = true
 
-        }else{
+        } else {
             fbtAddPolygon.isClickable = false
             fbtClerPolygon.isClickable = false
             fbtSend.isClickable = false
             fbtList.isClickable = false
         }
     }
-
 
 
     override fun onMapReady(map: GoogleMap) {
@@ -184,7 +236,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, DialogFragmentAddP
             isCompassEnabled = true
             isMyLocationButtonEnabled = true
 
-            }
+        }
         //Inicializa com as coordenadas do centro do Brasil
         val initLatLng = LatLng(-15.842070765433535, -47.881240647210184)
         val cameraUpdate = CameraUpdateFactory.newLatLngZoom(initLatLng, 5f)
@@ -192,10 +244,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, DialogFragmentAddP
 
         try {
 
-                fbtAddPolygon.setOnClickListener{
-               // showDialogAddPolygon()
-                    val dialogFragmentAddPolygon = DialogFragmentAddPolygon()
-                    dialogFragmentAddPolygon.show(supportFragmentManager,"DialogFragmentAddPolygon")
+            fbtAddPolygon.setOnClickListener {
+                // showDialogAddPolygon()
+                val dialogFragmentAddPolygon = DialogFragmentAddPolygon()
+                dialogFragmentAddPolygon.show(supportFragmentManager, "DialogFragmentAddPolygon")
             }
 
 
@@ -212,9 +264,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, DialogFragmentAddP
         }
     }
 
-    private fun showDialogAddPolygon(){
+    private fun showDialogAddPolygon() {
         val builder = MaterialAlertDialogBuilder(this)
-        val view =layoutInflater.inflate(R.layout.dialog_add_polygon, null)
+        val view = layoutInflater.inflate(R.layout.dialog_add_polygon, null)
         builder.setView(view)
 
         val etLat = view.findViewById<TextInputEditText>(R.id.etLatitude)
@@ -222,17 +274,17 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, DialogFragmentAddP
         val etAzimuth = view.findViewById<TextInputEditText>(R.id.etAzimute)
         val etRadiusInMeters = view.findViewById<TextInputEditText>(R.id.etRaio)
 
-        builder.setPositiveButton("Adicionar"){ dialog, _ ->
+        builder.setPositiveButton("Adicionar") { dialog, _ ->
 
             var lat = Util.convertCoord(etLat.text.toString())
             var lng = Util.convertCoord(etLng.text.toString())
-            var azimuth = etAzimuth.text.toString().toDoubleOrNull() ?:0.0
+            var azimuth = etAzimuth.text.toString().toDoubleOrNull() ?: 0.0
             var radiusInMeters = etRadiusInMeters.text.toString().toDoubleOrNull() ?: 0.0
-            var latLng = LatLng(lat,lng)
+            var latLng = LatLng(lat, lng)
             onMenuButtonClicked()
 
             mapViewModel.setCenterLocation(latLng)
-            Log.e("MapDebug", "Carregou o CenterLocation com"+latLng)
+            Log.e("MapDebug", "Carregou o CenterLocation com" + latLng)
             mapViewModel.setAzimuth(azimuth)
             mapViewModel.setRadiusInMeters(radiusInMeters)
 
@@ -241,7 +293,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, DialogFragmentAddP
                 var polygonPoints = mapViewModel.getSectorPolygonPoints()
                 drawSectorPolygon(polygonPoints)
 
-                val cameraUpdate = CameraUpdateFactory.newLatLngZoom(mapViewModel.getCenterLocation(), 13.5f)
+                val cameraUpdate =
+                    CameraUpdateFactory.newLatLngZoom(mapViewModel.getCenterLocation(), 13.5f)
                 googleMap.animateCamera(cameraUpdate)
 
             } catch (e: Exception) {
@@ -250,14 +303,14 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, DialogFragmentAddP
 
         }
 
-                builder.setNegativeButton("Cancelar",null)
+        builder.setNegativeButton("Cancelar", null)
         builder.show()
 
     }
 
-    private fun showDialogClear(){
+    private fun showDialogClear() {
         val builder = MaterialAlertDialogBuilder(this)
-        val view =layoutInflater.inflate(R.layout.dialog_clear_polygon, null)
+        val view = layoutInflater.inflate(R.layout.dialog_clear_polygon, null)
         builder.setView(view)
 
         val btnLast = view.findViewById<MaterialButton>(R.id.btnLast)
@@ -267,28 +320,28 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, DialogFragmentAddP
         val dialog = builder.create()
 
 
-        btnLast.setOnClickListener{
+        btnLast.setOnClickListener {
             clearLastSectorPolygon()
 
             dialog.dismiss()
 
         }
 
-        btnAll.setOnClickListener{
+        btnAll.setOnClickListener {
             clearAllSectorPolygon()
             dialog.dismiss()
 
         }
 
-        btnCancel.setOnClickListener{
+        btnCancel.setOnClickListener {
 
             dialog.cancel()
 
         }
 
-        builder.setPositiveButton(null,null)
-        builder.setNeutralButton(null,null)
-        builder.setNegativeButton(null,null)
+        builder.setPositiveButton(null, null)
+        builder.setNeutralButton(null, null)
+        builder.setNegativeButton(null, null)
 
         dialog.show()
 
@@ -303,7 +356,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, DialogFragmentAddP
         }
 
         // Remover polígono anterior se existir
-       // sectorPolygon?.remove()
+        // sectorPolygon?.remove()
 
         // Criar as options do polígono
         val polygonOptions = PolygonOptions().apply {
@@ -329,7 +382,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, DialogFragmentAddP
     }
 
     @SuppressLint("NewApi")
-    private fun clearLastSectorPolygon(){
+    private fun clearLastSectorPolygon() {
         val lastPolygon = polygonsList.removeLastOrNull()
         lastPolygon?.remove()
         markersList.last().remove()
@@ -339,8 +392,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, DialogFragmentAddP
         Snackbar.make(rootView, "último azimute apagado!", Snackbar.LENGTH_SHORT).show()
     }
 
-    private fun clearAllSectorPolygon(){
-        for (polygon in polygonsList){
+    private fun clearAllSectorPolygon() {
+        for (polygon in polygonsList) {
             polygon.remove()
         }
         polygonsList.clear()
@@ -351,9 +404,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, DialogFragmentAddP
 
     //Cria um marcador na localização geografica
     private fun addMarker(latLng: LatLng) {
-       // val icon = vectorToBitmap(R.drawable.ic_tower_48)
-        val bitmap = BitmapFactory.decodeResource(resources, R.drawable.ic_tower_new)
-        val icon = BitmapDescriptorFactory.fromBitmap(bitmap)
+        val icon = vectorToBitmap(R.drawable.ic_tower_48)
+        // val bitmap = BitmapFactory.decodeResource(resources, R.drawable.ic_tower_48)
+        // val icon = BitmapDescriptorFactory.fromBitmap(bitmap)
         val markerOptions = MarkerOptions()
             .position(latLng)
             .title("ERB")
@@ -369,8 +422,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, DialogFragmentAddP
     //Converte o icone vetor pra bitmap
     fun vectorToBitmap(@DrawableRes id: Int): BitmapDescriptor {
         val vectorDrawable = ResourcesCompat.getDrawable(resources, id, null)
-        val bitmap = Bitmap.createBitmap(vectorDrawable!!.intrinsicWidth,
-            vectorDrawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
+        val bitmap = Bitmap.createBitmap(
+            vectorDrawable!!.intrinsicWidth,
+            vectorDrawable.intrinsicHeight, Bitmap.Config.ARGB_8888
+        )
 
         val canvas = Canvas(bitmap)
         vectorDrawable.setBounds(0, 0, canvas.width, canvas.height)
@@ -378,8 +433,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, DialogFragmentAddP
         return BitmapDescriptorFactory.fromBitmap(bitmap)
 
     }
-
-
 
 
     override fun onStart() {
@@ -416,6 +469,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, DialogFragmentAddP
         super.onSaveInstanceState(outState)
         mapView.onSaveInstanceState(outState)
         Log.d("MapViewLifecycle", "onSaveInstanceState chamado")
+
+        //Salvar o estado do menu
+        outState.putBoolean("menu_state", clicked)
     }
 
     override fun onLowMemory() {
@@ -424,17 +480,19 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, DialogFragmentAddP
         Log.d("MapViewLifecycle", "onLowMemory chamado")
     }
 
+
+
     override fun onDataSended(
         lat: Double,
         lng: Double,
         azimuth: Double,
         radiusInMeters: Double
     ) {
-        var latLng = LatLng(lat,lng)
+        var latLng = LatLng(lat, lng)
         onMenuButtonClicked()
 
         mapViewModel.setCenterLocation(latLng)
-        Log.e("MapDebug", "Carregou o CenterLocation com"+latLng)
+        Log.e("MapDebug", "Carregou o CenterLocation com" + latLng)
         mapViewModel.setAzimuth(azimuth)
         mapViewModel.setRadiusInMeters(radiusInMeters)
 
@@ -443,7 +501,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback, DialogFragmentAddP
             var polygonPoints = mapViewModel.getSectorPolygonPoints()
             drawSectorPolygon(polygonPoints)
 
-            val cameraUpdate = CameraUpdateFactory.newLatLngZoom(mapViewModel.getCenterLocation(), 13.5f)
+            val cameraUpdate =
+                CameraUpdateFactory.newLatLngZoom(mapViewModel.getCenterLocation(), 13.5f)
             googleMap.animateCamera(cameraUpdate)
 
         } catch (e: Exception) {
