@@ -9,14 +9,11 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.LatLng
+import devandroid.adenilton.estudomap.model.MarkerData
+import devandroid.adenilton.estudomap.model.PolygonData
 import devandroid.adenilton.estudomap.model.SectorPolygon
-import java.io.File
-import java.io.FileOutputStream
-import java.io.OutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -31,6 +28,9 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
 
 
     private var sectorPolygon: SectorPolygon? = null
+
+    var newStateClicked = false
+
 
     private fun updateSectorPolygon(){
        sectorPolygon = SectorPolygon(
@@ -111,6 +111,7 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     companion object{
+
         fun checkAzimuth (azimuthStg: String): Boolean {
             if (azimuthStg.toDouble() >= 0.0 && azimuthStg.toDouble()<=360){
                 return false
@@ -138,8 +139,38 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
 
         }
 
+
     }
 
+    private val _polygonsList = mutableListOf<PolygonData>()
+    val polygonsList : List<PolygonData> = _polygonsList
+
+    fun addPolygon(polygonData: PolygonData) {
+        _polygonsList.add(polygonData)
+    }
+
+    fun removeLastPolygon(){
+        _polygonsList.removeLastOrNull()
+    }
+
+    fun removeAllPolygon(){
+        _polygonsList.clear()
+    }
+
+    private val _markersList = mutableListOf<MarkerData>()
+    val markersList: List<MarkerData> = _markersList
+
+    fun addMarker(markerData: MarkerData) {
+        _markersList.add(markerData)
+    }
+
+    fun removeLastMarker(){
+        _markersList.removeLastOrNull()
+    }
+
+    fun removeAllMarkers(){
+        _markersList.clear()
+    }
 
 
 }

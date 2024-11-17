@@ -2,7 +2,6 @@ package devandroid.adenilton.estudomap.view
 
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
 import android.os.Bundle
@@ -10,7 +9,6 @@ import android.util.Log
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AppCompatActivity
@@ -33,10 +31,11 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.textfield.TextInputEditText
 import devandroid.adenilton.estudomap.R
-import devandroid.adenilton.estudomap.utils.Util
+import devandroid.adenilton.estudomap.model.MarkerData
+import devandroid.adenilton.estudomap.model.PolygonData
 import devandroid.adenilton.estudomap.viewmodel.MapViewModel
+import kotlin.properties.Delegates
 
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback,
@@ -85,8 +84,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
     private var sectorPolygon: Polygon? = null
 
     //--Variáveis para o controle da lista de poligonos
-    private val polygonsList = mutableListOf<Polygon>()
-    private var markersList = mutableListOf<Marker>()
+    private var markersOnMap = mutableListOf<Marker>()
+    private  val polygonsOnMap = mutableListOf<Polygon>()
 
     private lateinit var mapViewModel: MapViewModel
 
@@ -103,7 +102,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
 
         mapViewModel = ViewModelProvider(this).get(MapViewModel::class.java)
 
-
         //Inicializa os botões do Menu
         starMenuButtons()
 
@@ -113,12 +111,13 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
             onMenuButtonClicked()
         }
         if (savedInstanceState != null) {
+
             clicked = savedInstanceState.getBoolean("menu_state", false)
             clicked = !clicked
             setVisibility(clicked)
             setAnimation(clicked)
             setClickable(clicked)
-            clicked = !clicked
+           clicked = !clicked
         }
 
         // Inicializar o cliente de localização
@@ -135,24 +134,30 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
 
         Log.d("MapViewSequence", " onCreate finalizado")
 
-        // Configurar o OnBackPressedDispatcher
+        // Obtém o objeto onBackPressedDispatcher da Activity atual.
+        // Esse objeto gerencia os eventos do botão "voltar".
         val onBackPressedDispatcher = this.onBackPressedDispatcher
-        val callback = object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                if(clicked){
-                    onMenuButtonClicked()
-                }else {
+
+        // Cria um callback que será chamado quando o botão "voltar" for pressionado.
+        val callback = object : OnBackPressedCallback(true) { // true indica que o callback está habilitado
+            override fun handleOnBackPressed() { // Método chamado ao pressionar o botão "voltar"
+                if(clicked){ // Verifica se o menu flutuante está aberto
+                    onMenuButtonClicked() // Fecha o menu flutuante
+                }else {// Se o menu flutuante estiver fechado
+                    // Cria um AlertDialog para confirmar o fechamento do app
                     MaterialAlertDialogBuilder(this@MainActivity)
                         .setTitle("Fechar o app?")
                         .setMessage("Tem certeza que deseja sair?")
-                        .setPositiveButton("Sim") { _, _ ->
-                            finish()
+                        .setPositiveButton("Sim") { _, _ -> // Define o botão positivo ("Sim")
+                            finish() // Fecha a Activity (encerra o app)
                         }
-                        .setNegativeButton("Não", null)
-                        .show()
+                        .setNegativeButton("Não", null) // Define o botão negativo ("Não")
+                        .show() // Exibe o AlertDialog
                 }
             }
         }
+        // Adiciona o callback ao onBackPressedDispatcher.
+        // Agora, o callback será chamado quando o botão "voltar" for pressionado.
         onBackPressedDispatcher.addCallback(this, callback)
 
 
@@ -170,10 +175,14 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
     }
 
     private fun onMenuButtonClicked() {
+
         setVisibility(clicked)
         setAnimation(clicked)
         setClickable(clicked)
         clicked = !clicked
+
+
+
 
     }
 
@@ -193,17 +202,18 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
 
     private fun setAnimation(clicked: Boolean) {
         if (!clicked) {
-            fbtAddPolygon.startAnimation(fromBotton)
-            fbtClerPolygon.startAnimation(fromBotton)
-            fbtSend.startAnimation(fromBotton)
-            fbtList.startAnimation(fromBotton)
-            fbtMenu.startAnimation(rotateOpen)
+            fbtAddPolygon.startAnimation(fromBotton.apply { setAnimationListener(animationListener) })
+            fbtClerPolygon.startAnimation(fromBotton.apply { setAnimationListener(animationListener) })
+            fbtSend.startAnimation(fromBotton.apply { setAnimationListener(animationListener) })
+            fbtList.startAnimation(fromBotton.apply { setAnimationListener(animationListener) })
+            fbtMenu.startAnimation(rotateOpen.apply { setAnimationListener(animationListener) })
+
         } else {
-            fbtAddPolygon.startAnimation(toBotton)
-            fbtClerPolygon.startAnimation(toBotton)
-            fbtSend.startAnimation(toBotton)
-            fbtList.startAnimation(toBotton)
-            fbtMenu.startAnimation(rotateClose)
+            fbtAddPolygon.startAnimation(toBotton.apply { setAnimationListener(animationListener) })
+            fbtClerPolygon.startAnimation(toBotton.apply { setAnimationListener(animationListener) })
+            fbtSend.startAnimation(toBotton.apply { setAnimationListener(animationListener) })
+            fbtList.startAnimation(toBotton.apply { setAnimationListener(animationListener) })
+            fbtMenu.startAnimation(rotateClose.apply { setAnimationListener(animationListener) })
         }
 
     }
@@ -220,6 +230,25 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
             fbtClerPolygon.isClickable = false
             fbtSend.isClickable = false
             fbtList.isClickable = false
+        }
+    }
+
+    val animationListener = object : Animation.AnimationListener {
+        override fun onAnimationStart(animation: Animation?) {
+            // Desabilita os botões no início da animação
+            setClickable(false)
+           // setVisibility(false)
+        }
+
+        override fun onAnimationEnd(animation: Animation?) {
+            // Habilita ou desabilita os botões no final da animação,
+            // de acordo com o estado do menu
+            setClickable(!clicked)
+          // setVisibility(clicked)
+        }
+
+        override fun onAnimationRepeat(animation: Animation?) {
+            // Não precisa fazer nada aqui
         }
     }
 
@@ -256,57 +285,55 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
         }
 
         fbtClerPolygon.setOnClickListener {
+            if (polygonsOnMap.isEmpty()) { // Verifica se a lista está vazia
+                val rootView = findViewById<View>(android.R.id.content)
+                Snackbar.make(rootView, "O mapa já está limpo!", Snackbar.LENGTH_SHORT).show()
+
+            }else
             showDialogClear()
         }
 
         fbtSend.setOnClickListener {
-            mapViewModel.saveMapAsImage(googleMap)
+            if (polygonsOnMap.isEmpty()) { // Verifica se a lista está vazia
+                val rootView = findViewById<View>(android.R.id.content)
+                val snackbar = Snackbar.make(rootView, "Nenhuma ERB e azimute no mapa!", Snackbar.LENGTH_SHORT)
+                snackbar.view.textAlignment = View.TEXT_ALIGNMENT_CENTER
+                snackbar.show()
+
+            }else mapViewModel.saveMapAsImage(googleMap)
         }
-    }
+        // Restaurar os polígonos
+        for (polygonData in mapViewModel.polygonsList) {
+            val polygonOptions = PolygonOptions().apply {
+                addAll(polygonData.points)
+                strokeColor(polygonData.strokeColor)
+                strokeWidth(polygonData.strokeWidth)
+                fillColor(polygonData.fillColor)
 
-    private fun showDialogAddPolygon() {
-        val builder = MaterialAlertDialogBuilder(this)
-        val view = layoutInflater.inflate(R.layout.dialog_add_polygon, null)
-        builder.setView(view)
-
-        val etLat = view.findViewById<TextInputEditText>(R.id.etLatitude)
-        val etLng = view.findViewById<TextInputEditText>(R.id.etLongitude)
-        val etAzimuth = view.findViewById<TextInputEditText>(R.id.etAzimute)
-        val etRadiusInMeters = view.findViewById<TextInputEditText>(R.id.etRaio)
-
-        builder.setPositiveButton("Adicionar") { dialog, _ ->
-
-            var lat = Util.convertCoord(etLat.text.toString())
-            var lng = Util.convertCoord(etLng.text.toString())
-            var azimuth = etAzimuth.text.toString().toDoubleOrNull() ?: 0.0
-            var radiusInMeters = etRadiusInMeters.text.toString().toDoubleOrNull() ?: 0.0
-            var latLng = LatLng(lat, lng)
-            onMenuButtonClicked()
-
-            mapViewModel.setCenterLocation(latLng)
-            Log.e("MapDebug", "Carregou o CenterLocation com" + latLng)
-            mapViewModel.setAzimuth(azimuth)
-            mapViewModel.setRadiusInMeters(radiusInMeters)
-
-            try {
-
-                var polygonPoints = mapViewModel.getSectorPolygonPoints()
-                drawSectorPolygon(polygonPoints)
-
-                val cameraUpdate =
-                    CameraUpdateFactory.newLatLngZoom(mapViewModel.getCenterLocation(), 13.5f)
-                googleMap.animateCamera(cameraUpdate)
-
-            } catch (e: Exception) {
-                Log.e("MapDebug", "Erro no onMapReady", e)
+            }
+            googleMap.addPolygon(polygonOptions)?.let{
+                polygonsOnMap.add(it)
             }
 
+            val cameraUpdate =
+                CameraUpdateFactory.newLatLngZoom(mapViewModel.getCenterLocation(), 13.5f)
+            googleMap.animateCamera(cameraUpdate)
         }
 
-        builder.setNegativeButton("Cancelar", null)
-        builder.show()
+        // Recriar os marcadores
+        for (markerData in mapViewModel.markersList) {
+            val icon = vectorToBitmap(markerData.iconId) // Usa o ID do ícone armazenado
+            val markerOptions = MarkerOptions()
+                .position(markerData.latLng)
+                .title(markerData.title)
+                .snippet(markerData.snippet)
+                .icon(icon)
+            googleMap.addMarker(markerOptions)?.let { markersOnMap.add(it) }
+
+        }
 
     }
+
 
     private fun showDialogClear() {
         val builder = MaterialAlertDialogBuilder(this)
@@ -355,9 +382,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
             return
         }
 
-        // Remover polígono anterior se existir
-        // sectorPolygon?.remove()
-
         // Criar as options do polígono
         val polygonOptions = PolygonOptions().apply {
             addAll(sectorPoints)
@@ -374,8 +398,16 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
         if (polygon != null) {
             sectorPolygon = polygon
 
-            polygonsList.add(polygon)
+            polygonsOnMap.add(polygon)
             Log.d("MapDebug", "Poligono criado com sucesso")
+
+            val polygonData = PolygonData(
+                sectorPoints,
+                Color.BLUE,
+                2f,
+                Color.argb(70, 0, 0, 255)
+            )
+            mapViewModel.addPolygon(polygonData)
         } else {
             Log.e("MapDebug", "Falha ao criar poligono")
         }
@@ -383,21 +415,26 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
 
     @SuppressLint("NewApi")
     private fun clearLastSectorPolygon() {
-        val lastPolygon = polygonsList.removeLastOrNull()
-        lastPolygon?.remove()
-        markersList.last().remove()
-        markersList.removeLast()
+        polygonsOnMap.removeLastOrNull()?.remove() // Remove o polígono do mapa e da lista na MainActivity
+        markersOnMap.removeLastOrNull()?.remove() // Remove o marcador do mapa e da lista na MainActivity
+
+        mapViewModel.removeLastPolygon() // Remove o polígono do ViewModel
+        mapViewModel.removeLastMarker() // Remove o marcador do ViewModel
 
         val rootView = findViewById<View>(android.R.id.content)
-        Snackbar.make(rootView, "último azimute apagado!", Snackbar.LENGTH_SHORT).show()
+        Snackbar.make(rootView, "Útima ERB e azimute apagado!", Snackbar.LENGTH_SHORT).show()
     }
 
     private fun clearAllSectorPolygon() {
-        for (polygon in polygonsList) {
-            polygon.remove()
-        }
-        polygonsList.clear()
-        googleMap.clear()
+        googleMap.clear() // Limpa todos os elementos do mapa (incluindo polígonos e marcadores)
+
+        polygonsOnMap.clear() // Limpa a lista de polígonos na MainActivity
+        mapViewModel.removeAllPolygon()// Remove todos os polígonos do ViewModel
+
+
+        markersOnMap.clear() // Limpa a lista de marcadores na MainActivity
+        mapViewModel.removeAllMarkers() // Remove todos os marcadores do ViewModel
+
         val rootView = findViewById<View>(android.R.id.content)
         Snackbar.make(rootView, "Mapa limpo!", Snackbar.LENGTH_SHORT).show()
     }
@@ -405,8 +442,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
     //Cria um marcador na localização geografica
     private fun addMarker(latLng: LatLng) {
         val icon = vectorToBitmap(R.drawable.ic_tower_48)
-        // val bitmap = BitmapFactory.decodeResource(resources, R.drawable.ic_tower_48)
-        // val icon = BitmapDescriptorFactory.fromBitmap(bitmap)
         val markerOptions = MarkerOptions()
             .position(latLng)
             .title("ERB")
@@ -415,8 +450,16 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
 
         val marcador = googleMap.addMarker(markerOptions)
         if (marcador != null) {
-            markersList.add(marcador)
+            markersOnMap.add(marcador)
         }
+        // Salvar as informações do marcador no ViewModel
+        val markerData = MarkerData(
+            latLng,
+            "ERB",
+            "Lat: ${latLng.latitude}, Lng: ${latLng.longitude}",
+            R.drawable.ic_tower_48 // Passa o ID do ícone
+        )
+        mapViewModel.addMarker(markerData)
     }
 
     //Converte o icone vetor pra bitmap
@@ -510,6 +553,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
         }
 
     }
+
+
 
 
 }
