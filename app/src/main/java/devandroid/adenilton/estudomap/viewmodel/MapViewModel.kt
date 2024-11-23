@@ -1,15 +1,19 @@
 package devandroid.adenilton.estudomap.viewmodel
 
 import android.app.Application
+import android.content.ContentValues
 import android.graphics.Bitmap
+import android.net.Uri
+import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
 import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.LatLng
+import devandroid.adenilton.estudomap.model.MarkerData
+import devandroid.adenilton.estudomap.model.PolygonData
 import devandroid.adenilton.estudomap.model.SectorPolygon
-import java.io.File
-import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -24,6 +28,9 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
 
 
     private var sectorPolygon: SectorPolygon? = null
+
+    var newStateClicked = false
+
 
     private fun updateSectorPolygon(){
        sectorPolygon = SectorPolygon(
@@ -66,11 +73,7 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
 
         googleMap.snapshot { bitmap ->
             if(bitmap != null){
-                val outputStream = FileOutputStream(File(
-                    getApplication<Application>().getExternalFilesDir(null),fileName))
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
-                outputStream.flush()
-                outputStream.close()
+                saveToGallery(bitmap,fileName)
                 Toast.makeText(getApplication(), "Mapa salvo como imagem!", Toast.LENGTH_SHORT).show()
             }else{
 
@@ -78,6 +81,96 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    private fun saveToGallery(bitmap: Bitmap,fileName: String){
+        val contentValues = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+            put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
+
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
+                put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
+                put(MediaStore.MediaColumns.IS_PENDING, 1)
+            }
+        }
+
+        val contentResolver = getApplication<Application>().contentResolver
+        val imageUri: Uri? = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+
+
+        imageUri?.let { uri: Uri ->
+            contentResolver.openOutputStream(uri)?.use {
+                outputStream -> bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream) }
+        }
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
+            if(imageUri != null){
+                contentValues.clear()
+                contentValues.put(MediaStore.MediaColumns.IS_PENDING, 0)
+                contentResolver.update(imageUri, contentValues, null,null)
+            }
+        }
+    }
+
+    companion object{
+
+        fun checkAzimuth (azimuthStg: String): Boolean {
+            if (azimuthStg.toDouble() >= 0.0 && azimuthStg.toDouble()<=360){
+                return false
+            }else
+                return true
+
+
+        }
+
+        fun checkLat (latStg: String): Boolean {
+            if (latStg.toDouble() >= -90.0 && latStg.toDouble()<=90){
+                return false
+            }else
+                return true
+
+
+        }
+
+        fun checkLng (lngStg: String): Boolean {
+            if (lngStg.toDouble() >= -180.0 && lngStg.toDouble()<=180){
+                return false
+            }else
+                return true
+
+
+        }
+
+
+    }
+
+    private val _polygonsList = mutableListOf<PolygonData>()
+    val polygonsList : List<PolygonData> = _polygonsList
+
+    fun addPolygon(polygonData: PolygonData) {
+        _polygonsList.add(polygonData)
+    }
+
+    fun removeLastPolygon(){
+        _polygonsList.removeLastOrNull()
+    }
+
+    fun removeAllPolygon(){
+        _polygonsList.clear()
+    }
+
+    private val _markersList = mutableListOf<MarkerData>()
+    val markersList: List<MarkerData> = _markersList
+
+    fun addMarker(markerData: MarkerData) {
+        _markersList.add(markerData)
+    }
+
+    fun removeLastMarker(){
+        _markersList.removeLastOrNull()
+    }
+
+    fun removeAllMarkers(){
+        _markersList.clear()
+    }
 
 
 }
