@@ -140,7 +140,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
 
         // Cria um callback que será chamado quando o botão "voltar" for pressionado.
         val callback = object : OnBackPressedCallback(true) { // true indica que o callback está habilitado
-            override fun handleOnBackPressed() { // Método chamado ao pressionar o botão "voltar"
+            override fun handleOnBackPressed() {
                 if(clicked){ // Verifica se o menu flutuante está aberto
                     onMenuButtonClicked() // Fecha o menu flutuante
                 }else {// Se o menu flutuante estiver fechado
