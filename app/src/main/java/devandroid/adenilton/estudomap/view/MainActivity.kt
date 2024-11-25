@@ -4,15 +4,22 @@ import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
+import android.widget.TableLayout
+import android.widget.TableRow
 import androidx.activity.OnBackPressedCallback
 import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.alpha
+import androidx.core.graphics.blue
+import androidx.core.graphics.green
+import androidx.core.graphics.red
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -28,6 +35,7 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.Polygon
 import com.google.android.gms.maps.model.PolygonOptions
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.color.utilities.ColorUtils
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
@@ -375,7 +383,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
     }
 
 
-    private fun drawSectorPolygon(sectorPoints: List<LatLng>) {
+    private fun drawSectorPolygon(sectorPoints: List<LatLng>, color: Int) {
+        var setColor = color
+
         // Verificar se o mapa está inicializado
         if (!::googleMap.isInitialized) {
             Log.e("MapDebug", "Google Map nao esta inicializado")
@@ -385,9 +395,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
         // Criar as options do polígono
         val polygonOptions = PolygonOptions().apply {
             addAll(sectorPoints)
-            strokeColor(Color.BLUE)
+            strokeColor(setColor)
             strokeWidth(2f)
-            fillColor(Color.argb(70, 0, 0, 255))
+            fillColor(Color.argb(70,setColor.red,setColor.green,setColor.blue))
         }
 
         // Adicionar o polígono e verificar
@@ -403,9 +413,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
 
             val polygonData = PolygonData(
                 sectorPoints,
-                Color.BLUE,
+                setColor,
                 2f,
-                Color.argb(70, 0, 0, 255)
+                Color.argb(70, setColor.red,setColor.green,setColor.blue)
             )
             mapViewModel.addPolygon(polygonData)
         } else {
@@ -478,6 +488,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
     }
 
 
+
     override fun onStart() {
         super.onStart()
         mapView.onStart()
@@ -529,7 +540,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
         lat: Double,
         lng: Double,
         azimuth: Double,
-        radiusInMeters: Double
+        radiusInMeters: Double,
+        identifier: String,
+        description: String,
+        colorToPass: Int
+
     ) {
         var latLng = LatLng(lat, lng)
         onMenuButtonClicked()
@@ -542,7 +557,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
         try {
 
             var polygonPoints = mapViewModel.getSectorPolygonPoints()
-            drawSectorPolygon(polygonPoints)
+            drawSectorPolygon(polygonPoints, colorToPass)
 
             val cameraUpdate =
                 CameraUpdateFactory.newLatLngZoom(mapViewModel.getCenterLocation(), 13.5f)
