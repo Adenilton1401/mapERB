@@ -9,4 +9,6 @@
     <string name="btnCancel">Cancelar</string>
     <string name="btnAll">Todos</string>
     <string name="btnLast">Último</string>
+    <string name="Identificador">Identificador</string>
+    <string name="Descricao">Descrição</string>
 </resources>

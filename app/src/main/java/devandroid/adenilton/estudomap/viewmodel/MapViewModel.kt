@@ -11,9 +11,11 @@ import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Polygon
 import devandroid.adenilton.estudomap.model.MarkerData
 import devandroid.adenilton.estudomap.model.PolygonData
 import devandroid.adenilton.estudomap.model.SectorPolygon
+import devandroid.adenilton.estudomap.utils.Util
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -122,7 +124,7 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         fun checkLat (latStg: String): Boolean {
-            if (latStg.toDouble() >= -90.0 && latStg.toDouble()<=90){
+            if (Util.convertCoord(latStg) >= -90.0 && Util.convertCoord(latStg)<=90){
                 return false
             }else
                 return true
@@ -131,7 +133,7 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         fun checkLng (lngStg: String): Boolean {
-            if (lngStg.toDouble() >= -180.0 && lngStg.toDouble()<=180){
+            if (Util.convertCoord(lngStg) >= -180.0 && Util.convertCoord(lngStg)<=180){
                 return false
             }else
                 return true
@@ -149,8 +151,17 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
         _polygonsList.add(polygonData)
     }
 
-    fun removeLastPolygon(){
-        _polygonsList.removeLastOrNull()
+    fun removePolygon(polygon: Polygon){
+        val iterator =  _polygonsList.iterator()
+        while (iterator.hasNext()){
+            val dataPolygon = iterator.next()
+            if (dataPolygon.points == polygon.points){
+                iterator.remove()
+                break
+
+            }
+        }
+
     }
 
     fun removeAllPolygon(){
