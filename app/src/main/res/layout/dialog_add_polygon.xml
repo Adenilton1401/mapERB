@@ -118,7 +118,6 @@
         android:id="@+id/tiDescricao"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-
         android:hint="@string/Descricao"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

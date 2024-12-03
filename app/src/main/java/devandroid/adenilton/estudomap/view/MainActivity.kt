@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -33,6 +34,7 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.Polygon
 import com.google.android.gms.maps.model.PolygonOptions
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.color.utilities.ColorUtils
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
@@ -432,6 +434,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
 
 
     private fun drawSectorPolygon(sectorPoints: List<LatLng>, color: Int, identifier: String, description: String) {
+
         var setColor = color
 
         // Verificar se o mapa está inicializado
@@ -447,6 +450,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
             strokeWidth(2f)
             fillColor(Color.argb(70,setColor.red,setColor.green,setColor.blue))
             clickable(true)
+
         }
 
         // Adicionar o polígono e verificar
@@ -614,6 +618,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
         try {
 
             var polygonPoints = mapViewModel.getSectorPolygonPoints()
+
             drawSectorPolygon(polygonPoints, colorToPass,identifier, description)
 
             val cameraUpdate =

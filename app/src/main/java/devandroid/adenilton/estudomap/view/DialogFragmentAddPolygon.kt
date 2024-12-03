@@ -81,6 +81,7 @@ class DialogFragmentAddPolygon: DialogFragment() {
             val etDescricao = view.findViewById<TextInputEditText>(R.id.etDescricao)
             val btnCancel = view.findViewById<Button>(R.id.btnCancel)
             val btnAdd = view.findViewById<Button>(R.id.btnAdd)
+            setupColorGrid(view)
 
             setupColorGrid(view)
 
