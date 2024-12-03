@@ -83,14 +83,20 @@ class DialogFragmentAddPolygon: DialogFragment() {
             val btnAdd = view.findViewById<Button>(R.id.btnAdd)
             setupColorGrid(view)
 
+            setupColorGrid(view)
+
             btnAdd.setOnClickListener(){
+                // Processar as entradas substituindo ',' por '.' antes da conversão
+                val latitudeStr = etLat.text.toString().replace(",", ".")
+                val longitudeStr = etLng.text.toString().replace(",", ".")
+
                     //Verifeca se o campo Latitude foi preenchido
                 if (etLat.text!!.isEmpty()  ){
                     etLat.setError("Preencha a Latitude")
                     etLat.requestFocus()
 
                     //Verifica se a latitude é válida (entre -90 e 90)
-                }else if (MapViewModel.checkLat(etLat.text.toString())){
+                }else if (MapViewModel.checkLat(latitudeStr)){
                     etLat.setError("A Latitude deve estar entre -90 e 90")
                     etLat.requestFocus()
 
@@ -102,7 +108,7 @@ class DialogFragmentAddPolygon: DialogFragment() {
 
 
                     //Verifica se a Longitude é válida (entre -180 e 180)
-                }else if (MapViewModel.checkLng(etLng.text.toString())){
+                }else if (MapViewModel.checkLng(longitudeStr)){
                     etLng.setError("A Longitude deve estar entre -180 e 180")
                     etLng.requestFocus()
 
@@ -124,8 +130,8 @@ class DialogFragmentAddPolygon: DialogFragment() {
 
                 } else{
 
-                    var lat = Util.convertCoord(etLat.text.toString())
-                    var lng = Util.convertCoord(etLng.text.toString())
+                    var lat = Util.convertCoord(latitudeStr)
+                    var lng = Util.convertCoord(longitudeStr)
                     var azimuth = etAzimuth.text.toString().toDoubleOrNull() ?: 0.0
                     var radiusInMeters = etRadiusInMeters.text.toString().toDoubleOrNull() ?: 0.0
                     var idetifier = etIdentificador.text.toString()

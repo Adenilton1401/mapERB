@@ -20,12 +20,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/latitude"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/twTitulo">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etLatitude"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:digits="0123456789-,"
             android:inputType="numberDecimal|numberSigned" />
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -35,12 +38,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/longitude"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tilLatitude">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etLongitude"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:digits="0123456789-,"
             android:inputType="numberDecimal|numberSigned" />
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -50,6 +56,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/azimute"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tilLongitude">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -65,6 +73,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/raio"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tilAzimute">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -83,22 +93,24 @@
         android:text="Opcionais"
         android:textAlignment="center"
         android:textStyle="bold"
-        app:layout_constraintTop_toBottomOf="@id/tilRaio"
-        tools:layout_editor_absoluteX="16dp" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tilRaio" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tiIdentificador"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/Identificador"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/twoptional">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etIdentificador"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="text"
-            />
+            android:inputType="text" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -107,15 +119,16 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/Descricao"
-
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tiIdentificador">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etDescricao"
             android:layout_width="match_parent"
             android:layout_height="140dp"
-            android:inputType="textMultiLine|textImeMultiLine"
-            android:gravity="top|start"/>
+            android:gravity="top|start"
+            android:inputType="textMultiLine|textImeMultiLine" />
 
     </com.google.android.material.textfield.TextInputLayout>
 

@@ -1,6 +1,7 @@
 package devandroid.adenilton.estudomap.view
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -10,19 +11,17 @@ import android.util.Log
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import android.widget.TableLayout
-import android.widget.TableRow
+import android.widget.Button
+import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
-import androidx.core.graphics.alpha
 import androidx.core.graphics.blue
 import androidx.core.graphics.green
 import androidx.core.graphics.red
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.MapView
@@ -39,11 +38,16 @@ import com.google.android.material.color.utilities.ColorUtils
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.textview.MaterialTextView
 import devandroid.adenilton.estudomap.R
 import devandroid.adenilton.estudomap.model.MarkerData
 import devandroid.adenilton.estudomap.model.PolygonData
+import devandroid.adenilton.estudomap.utils.Util
 import devandroid.adenilton.estudomap.viewmodel.MapViewModel
-import kotlin.properties.Delegates
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.util.Locale
 
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback,
@@ -106,6 +110,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setLocale(Locale("pt", "BR"))
         setContentView(R.layout.activity_main)
 
         mapViewModel = ViewModelProvider(this).get(MapViewModel::class.java)
@@ -127,10 +132,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
             setClickable(clicked)
            clicked = !clicked
         }
-
-        // Inicializar o cliente de localização
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-
 
         // Inicialização do MapView
         mapView = findViewById(R.id.mapView)
@@ -317,6 +318,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
                 strokeColor(polygonData.strokeColor)
                 strokeWidth(polygonData.strokeWidth)
                 fillColor(polygonData.fillColor)
+                clickable(true)
 
             }
             googleMap.addPolygon(polygonOptions)?.let{
@@ -339,7 +341,55 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
             googleMap.addMarker(markerOptions)?.let { markersOnMap.add(it) }
 
         }
+       googleMap.setOnMarkerClickListener { marker ->
+            // Aqui você vai criar e exibir o balão de diálogo
+            showMarkerInfoWindow(marker)
+            true // Retorna true para indicar que o evento de clique foi consumido
+        }
 
+
+        googleMap.setOnPolygonClickListener { polygon ->
+            showPolygonOptionsDialog(polygon)
+        }
+    }
+
+    //Cria um dialogo para exibir as informações do Marcador
+    private fun showMarkerInfoWindow(marker: Marker) {
+        val markerData = mapViewModel.markersList.find { it.latLng == marker.position }
+        val polygonData = mapViewModel.polygonsList.find { polygon ->
+            polygon.points.any { it == marker.position }
+        }
+
+        if (markerData != null && polygonData != null) {
+            val builder = MaterialAlertDialogBuilder(this)
+            val view = layoutInflater.inflate(R.layout.dialog_marker_info, null) // Crie o layout dialog_marker_info.xml
+            builder.setView(view)
+
+            // Preencha os campos do layout com as informações do marcador e do polígono
+            val tvMarkerInfo = view.findViewById<MaterialTextView>(R.id.tvMarkerInfo)
+            val lat = markerData.latLng.latitude
+            val long = markerData.latLng.longitude
+
+            tvMarkerInfo.text = "Latitude: ${Util.formatCoord(lat, "lat")}\nLongitude: ${Util.formatCoord(long, "long")}\n"
+
+            val tvPolygonInfo = view.findViewById<TextView>(R.id.tvPolygonInfo)
+            CoroutineScope(Dispatchers.Main).launch {
+                val endereco = Util.obterEndereco(this@MainActivity,lat, long)
+                tvPolygonInfo.text = "Endereço: \n${endereco}"
+            }
+
+
+
+            // Adicione o botão para adicionar um novo polígono
+            val btnAddPolygon = view.findViewById<Button>(R.id.btnAddNewPolygon)
+            btnAddPolygon.setOnClickListener {
+                // Implemente a lógica para adicionar um novo polígono ao marcador
+               // addNewPolygonToMarker(marker)
+                builder.create().dismiss()
+            }
+
+            builder.show()
+        }
     }
 
 
@@ -356,7 +406,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
 
 
         btnLast.setOnClickListener {
-            clearLastSectorPolygon()
+            clearSectorPolygon(polygonsOnMap.last())
 
             dialog.dismiss()
 
@@ -383,7 +433,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
     }
 
 
-    private fun drawSectorPolygon(sectorPoints: List<LatLng>, color: Int) {
+    private fun drawSectorPolygon(sectorPoints: List<LatLng>, color: Int, identifier: String, description: String) {
+
         var setColor = color
 
         // Verificar se o mapa está inicializado
@@ -398,11 +449,13 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
             strokeColor(setColor)
             strokeWidth(2f)
             fillColor(Color.argb(70,setColor.red,setColor.green,setColor.blue))
+            clickable(true)
+
         }
 
         // Adicionar o polígono e verificar
         val polygon = googleMap.addPolygon(polygonOptions)
-        addMarker(mapViewModel.getCenterLocation())
+        addMarker(mapViewModel.getCenterLocation(), identifier, description)
 
 
         if (polygon != null) {
@@ -424,11 +477,12 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
     }
 
     @SuppressLint("NewApi")
-    private fun clearLastSectorPolygon() {
-        polygonsOnMap.removeLastOrNull()?.remove() // Remove o polígono do mapa e da lista na MainActivity
+    private fun clearSectorPolygon(polygon: Polygon) {
+        polygonsOnMap.remove(polygon) // Remove o polígono do mapa e da lista na MainActivity
+        polygon.remove()
         markersOnMap.removeLastOrNull()?.remove() // Remove o marcador do mapa e da lista na MainActivity
 
-        mapViewModel.removeLastPolygon() // Remove o polígono do ViewModel
+        mapViewModel.removePolygon(polygon) // Remove o polígono do ViewModel
         mapViewModel.removeLastMarker() // Remove o marcador do ViewModel
 
         val rootView = findViewById<View>(android.R.id.content)
@@ -450,12 +504,18 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
     }
 
     //Cria um marcador na localização geografica
-    private fun addMarker(latLng: LatLng) {
+    private fun addMarker(latLng: LatLng, identifier: String,description: String) {
+        val tIdentifier: String
+        if (identifier.isNullOrEmpty()){
+            tIdentifier = "ERB"
+        }else{
+            tIdentifier = identifier
+        }
         val icon = vectorToBitmap(R.drawable.ic_tower_48)
         val markerOptions = MarkerOptions()
             .position(latLng)
-            .title("ERB")
-            .snippet("Lat: ${latLng.latitude}, Lng: ${latLng.longitude}")
+            .title(tIdentifier)
+            .snippet("Lat: ${latLng.latitude}, Lng: ${latLng.longitude} ")
             .icon(icon)
 
         val marcador = googleMap.addMarker(markerOptions)
@@ -465,9 +525,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
         // Salvar as informações do marcador no ViewModel
         val markerData = MarkerData(
             latLng,
-            "ERB",
+            tIdentifier,
             "Lat: ${latLng.latitude}, Lng: ${latLng.longitude}",
-            R.drawable.ic_tower_48 // Passa o ID do ícone
+            R.drawable.ic_tower_48, // Passa o ID do ícone
+            description
         )
         mapViewModel.addMarker(markerData)
     }
@@ -557,7 +618,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
         try {
 
             var polygonPoints = mapViewModel.getSectorPolygonPoints()
-            drawSectorPolygon(polygonPoints, colorToPass)
+
+            drawSectorPolygon(polygonPoints, colorToPass,identifier, description)
 
             val cameraUpdate =
                 CameraUpdateFactory.newLatLngZoom(mapViewModel.getCenterLocation(), 13.5f)
@@ -567,6 +629,53 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
             Log.e("MapDebug", "Erro no onMapReady", e)
         }
 
+    }
+
+    fun Context.setLocale(locale: Locale) {
+        Locale.setDefault(locale)
+        val config = resources.configuration
+        config.setLocale(locale)
+        resources.updateConfiguration(config, resources.displayMetrics)
+    }
+
+    private fun showPolygonOptionsDialog(polygon: Polygon) {
+        val builder = MaterialAlertDialogBuilder(this)
+            .setTitle("Opções do Polígono")
+            .setItems(arrayOf("Editar", "Remover")) { dialog, which ->
+                when (which) {
+                    0 -> editarPoligono(polygon)
+                    1 -> removerPoligono(polygon)
+                }
+            }
+        builder.show()
+    }
+
+    private fun editarPoligono(polygon: Polygon) {
+        // Implementar a lógica para editar o polígono
+        // Por exemplo, abrir um diálogo pre-preenchido com os dados atuais
+        // e atualizar o polígono no ViewModel e no banco de dados
+    }
+
+    private fun removerPoligono(polygon: Polygon) {
+        // Remover do mapa
+        clearSectorPolygon(polygon)
+        //TODO implementar se ainda há poligonos no marcador e se não houver, remover o marcador
+        //
+
+        // Remover da lista
+        polygonsOnMap.remove(polygon)
+
+        // Remover do ViewModel e do banco de dados
+       /** val polygonData = mapViewModel.polygonsList.value?.find {
+            it.points == polygon.points
+
+        polygonData?.let {
+            mapViewModel.removePolygon(it)
+        }**/
+
+        // Mostrar uma mensagem de confirmação
+        val rootView = findViewById<View>(android.R.id.content)
+        Snackbar.make(rootView, "Polígono removido!", Snackbar.LENGTH_SHORT).show()
     }
 
 
