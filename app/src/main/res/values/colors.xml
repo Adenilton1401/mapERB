@@ -11,4 +11,7 @@
     <color name="amarelo">#CDDC39</color>
     <color name="dourado">#FFC107</color>
     <color name="laranja">#FF5722</color>
+    <color name="azul_bnt">#404ED9</color>
+    <color name="border">#929292</color>
+
 </resources>

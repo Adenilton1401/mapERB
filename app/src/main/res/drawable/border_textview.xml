@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <!-- Define a cor de fundo (transparente ou outra de sua preferência) -->
+    <solid android:color="@android:color/transparent" />
+
+    <!-- Define a borda -->
+    <stroke
+        android:width="1dp"
+        android:color="@color/border" />
+
+    <!-- Define cantos arredondados (opcional) -->
+    <corners android:radius="4dp" />
+
+    <!-- Define o padding interno (opcional) -->
+    <padding
+        android:left="4dp"
+        android:top="4dp"
+        android:right="4dp"
+        android:bottom="4dp" />
+</shape>

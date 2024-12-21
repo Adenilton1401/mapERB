@@ -3,7 +3,11 @@ package devandroid.adenilton.estudomap.model
 import com.google.android.gms.maps.model.LatLng
 
 data class PolygonData(
+    var polygonDataID: String,
     var points: List<LatLng>,
     val strokeColor: Int,
     val strokeWidth: Float,
-    val fillColor: Int)
+    val fillColor: Int,
+    val azimuth: Double,
+    val radiusInMeters: Double,
+    val description: String)

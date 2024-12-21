@@ -10,8 +10,6 @@ import android.util.Log
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import android.widget.Button
-import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AppCompatActivity
@@ -19,6 +17,7 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.blue
 import androidx.core.graphics.green
 import androidx.core.graphics.red
+import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -36,20 +35,19 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.textview.MaterialTextView
 import devandroid.adenilton.estudomap.R
 import devandroid.adenilton.estudomap.model.MarkerData
 import devandroid.adenilton.estudomap.model.PolygonData
-import devandroid.adenilton.estudomap.utils.Util
 import devandroid.adenilton.estudomap.viewmodel.MapViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.util.Locale
+import java.util.UUID
 
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback,
-    DialogFragmentAddPolygon.OnDataSendedListener {
+    DialogFragmentAddPolygon.OnDataSendedListener,
+    DialogFragmentAddAzimuth.OnDataSendedListener,
+    DialogFragmentAddAzimuth.OnCloseDialogListener,
+    DialogFragmentPolygonInfo.OnDataSendedListener{
 
     //Inicio da declaração de variáveis de botões
     private lateinit var fbtMenu: FloatingActionButton
@@ -173,9 +171,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
     private fun starMenuButtons() {
 
         fbtMenu = findViewById<FloatingActionButton>(R.id.fbtMenu)
-        fbtAddPolygon = findViewById<FloatingActionButton>(R.id.fbtAddPolygon)
-        fbtClerPolygon = findViewById<FloatingActionButton>(R.id.fbtClerPolygon)
-        fbtSend = findViewById<FloatingActionButton>(R.id.fbtSend)
+        fbtAddPolygon = findViewById<FloatingActionButton>(R.id.fbtAddErbAzimuth)
+        fbtClerPolygon = findViewById<FloatingActionButton>(R.id.fbtApagar)
+        fbtSend = findViewById<FloatingActionButton>(R.id.fbtSalve)
         fbtList = findViewById<FloatingActionButton>(R.id.fbtList)
 
 
@@ -322,10 +320,12 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
             googleMap.addPolygon(polygonOptions)?.let{
                 polygonsOnMap.add(it)
             }
+            polygonsOnMap.last().tag = polygonData.polygonDataID
 
             val cameraUpdate =
                 CameraUpdateFactory.newLatLngZoom(mapViewModel.getCenterLocation(), 13.5f)
             googleMap.animateCamera(cameraUpdate)
+
         }
 
         // Recriar os marcadores
@@ -339,56 +339,27 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
             googleMap.addMarker(markerOptions)?.let { markersOnMap.add(it) }
 
         }
+
+        //-- Ao clicar no marcador será criado um dialigo com informações e opções
        googleMap.setOnMarkerClickListener { marker ->
-            // Aqui você vai criar e exibir o balão de diálogo
-            showMarkerInfoWindow(marker)
+           val latitude = marker.position.latitude
+           val longitude = marker.position.longitude
+           val dialog = DialogFragmentMarkerInfo.newInstance(latitude, longitude)
+           dialog.show(supportFragmentManager, "DialogFragmentMarkerInfo")
+
             true // Retorna true para indicar que o evento de clique foi consumido
         }
 
 
         googleMap.setOnPolygonClickListener { polygon ->
-            showPolygonOptionsDialog(polygon)
+            val polygonId = polygon.tag.toString()
+            val dialogFragmentPolygonInfo = DialogFragmentPolygonInfo.newInstance(polygonId)
+            dialogFragmentPolygonInfo.show(supportFragmentManager,"DialogFragmentPolygonInfo")
+
+          //  showPolygonOptionsDialog(polygon)
         }
     }
 
-    //Cria um dialogo para exibir as informações do Marcador
-    private fun showMarkerInfoWindow(marker: Marker) {
-        val markerData = mapViewModel.markersList.find { it.latLng == marker.position }
-        val polygonData = mapViewModel.polygonsList.find { polygon ->
-            polygon.points.any { it == marker.position }
-        }
-
-        if (markerData != null && polygonData != null) {
-            val builder = MaterialAlertDialogBuilder(this)
-            val view = layoutInflater.inflate(R.layout.dialog_marker_info, null) // Crie o layout dialog_marker_info.xml
-            builder.setView(view)
-
-            // Preencha os campos do layout com as informações do marcador e do polígono
-            val tvMarkerInfo = view.findViewById<MaterialTextView>(R.id.tvMarkerInfo)
-            val lat = markerData.latLng.latitude
-            val long = markerData.latLng.longitude
-
-            tvMarkerInfo.text = "Latitude: ${Util.formatCoord(lat, "lat")}\nLongitude: ${Util.formatCoord(long, "long")}\n"
-
-            val tvPolygonInfo = view.findViewById<TextView>(R.id.tvPolygonInfo)
-            CoroutineScope(Dispatchers.Main).launch {
-                val endereco = Util.obterEndereco(this@MainActivity,lat, long)
-                tvPolygonInfo.text = "Endereço: \n${endereco}"
-            }
-
-
-
-            // Adicione o botão para adicionar um novo polígono
-            val btnAddPolygon = view.findViewById<Button>(R.id.btnAddNewPolygon)
-            btnAddPolygon.setOnClickListener {
-                // Implemente a lógica para adicionar um novo polígono ao marcador
-               // addNewPolygonToMarker(marker)
-                builder.create().dismiss()
-            }
-
-            builder.show()
-        }
-    }
 
 
     private fun showDialogClear() {
@@ -398,7 +369,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
 
         val btnLast = view.findViewById<MaterialButton>(R.id.btnLast)
         val btnAll = view.findViewById<MaterialButton>(R.id.btnAll)
-        val btnCancel = view.findViewById<MaterialButton>(R.id.btnCancel)
+        val btnCancel = view.findViewById<MaterialButton>(R.id.btnCancelDel)
 
         val dialog = builder.create()
 
@@ -431,7 +402,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
     }
 
 
-    private fun drawSectorPolygon(sectorPoints: List<LatLng>, color: Int, identifier: String, description: String) {
+    private fun drawSectorPolygon(sectorPoints: List<LatLng>, color: Int, identifierERB: String, description: String, azimuth: Double, radiusInMeters: Double) {
         var setColor = color
 
         // Verificar se o mapa está inicializado
@@ -451,20 +422,28 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
 
         // Adicionar o polígono e verificar
         val polygon = googleMap.addPolygon(polygonOptions)
-        addMarker(mapViewModel.getCenterLocation(), identifier, description)
+        addMarker(mapViewModel.getCenterLocation(), identifierERB)
 
 
         if (polygon != null) {
             sectorPolygon = polygon
+            val uniqueId = UUID.randomUUID().toString()
 
             polygonsOnMap.add(polygon)
+            polygonsOnMap.last().tag = uniqueId
             Log.d("MapDebug", "Poligono criado com sucesso")
 
+
+
             val polygonData = PolygonData(
+                uniqueId,
                 sectorPoints,
                 setColor,
                 2f,
-                Color.argb(70, setColor.red,setColor.green,setColor.blue)
+                Color.argb(70, setColor.red,setColor.green,setColor.blue),
+                azimuth,
+                radiusInMeters,
+                description
             )
             mapViewModel.addPolygon(polygonData)
         } else {
@@ -500,17 +479,17 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
     }
 
     //Cria um marcador na localização geografica
-    private fun addMarker(latLng: LatLng, identifier: String,description: String) {
-        val tIdentifier: String
-        if (identifier.isNullOrEmpty()){
-            tIdentifier = "ERB"
+    private fun addMarker(latLng: LatLng, identifierERB: String) {
+        val tIdentifierERB: String
+        if (identifierERB.isNullOrEmpty()){
+            tIdentifierERB = "ERB"
         }else{
-            tIdentifier = identifier
+            tIdentifierERB = identifierERB
         }
         val icon = vectorToBitmap(R.drawable.ic_tower_48)
         val markerOptions = MarkerOptions()
             .position(latLng)
-            .title(tIdentifier)
+            .title(tIdentifierERB)
             .snippet("Lat: ${latLng.latitude}, Lng: ${latLng.longitude} ")
             .icon(icon)
 
@@ -521,10 +500,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
         // Salvar as informações do marcador no ViewModel
         val markerData = MarkerData(
             latLng,
-            tIdentifier,
+            tIdentifierERB,
             "Lat: ${latLng.latitude}, Lng: ${latLng.longitude}",
-            R.drawable.ic_tower_48, // Passa o ID do ícone
-            description
+            R.drawable.ic_tower_48 // Passa o ID do ícone
+
         )
         mapViewModel.addMarker(markerData)
     }
@@ -602,9 +581,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
         description: String,
         colorToPass: Int
 
+
     ) {
         var latLng = LatLng(lat, lng)
-        onMenuButtonClicked()
+        //onMenuButtonClicked()
 
         mapViewModel.setCenterLocation(latLng)
         Log.e("MapDebug", "Carregou o CenterLocation com" + latLng)
@@ -614,7 +594,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
         try {
 
             var polygonPoints = mapViewModel.getSectorPolygonPoints()
-            drawSectorPolygon(polygonPoints, colorToPass,identifier, description)
+            drawSectorPolygon(polygonPoints, colorToPass,identifier, description, azimuth, radiusInMeters)
 
             val cameraUpdate =
                 CameraUpdateFactory.newLatLngZoom(mapViewModel.getCenterLocation(), 13.5f)
@@ -626,6 +606,29 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
 
     }
 
+    override fun onCloseDialogERB() {
+        // Fechar ambos os DialogFragments
+        val DialogFragmentMarkerInfo = supportFragmentManager.findFragmentByTag("DialogFragmentMarkerInfo") as? DialogFragment
+        DialogFragmentMarkerInfo?.dismiss()
+
+
+    }
+
+    override fun onDataToRemovePolygon(
+        polygonDataID: String
+    ){
+        for (polygon in polygonsOnMap){
+            if(polygon.tag == polygonDataID){
+                clearSectorPolygon(polygon)
+                val DialogFragmentPolygonInfo = supportFragmentManager.findFragmentByTag("DialogFragmentPolygonInfo") as? DialogFragment
+                DialogFragmentPolygonInfo?.dismiss()
+            }
+        }
+
+    }
+
+
+
     fun Context.setLocale(locale: Locale) {
         Locale.setDefault(locale)
         val config = resources.configuration
@@ -633,45 +636,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
         resources.updateConfiguration(config, resources.displayMetrics)
     }
 
-    private fun showPolygonOptionsDialog(polygon: Polygon) {
-        val builder = MaterialAlertDialogBuilder(this)
-            .setTitle("Opções do Polígono")
-            .setItems(arrayOf("Editar", "Remover")) { dialog, which ->
-                when (which) {
-                    0 -> editarPoligono(polygon)
-                    1 -> removerPoligono(polygon)
-                }
-            }
-        builder.show()
-    }
 
-    private fun editarPoligono(polygon: Polygon) {
-        // Implementar a lógica para editar o polígono
-        // Por exemplo, abrir um diálogo pre-preenchido com os dados atuais
-        // e atualizar o polígono no ViewModel e no banco de dados
-    }
-
-    private fun removerPoligono(polygon: Polygon) {
-        // Remover do mapa
-        clearSectorPolygon(polygon)
-        //TODO implementar se ainda há poligonos no marcador e se não houver, remover o marcador
-        //
-
-        // Remover da lista
-        polygonsOnMap.remove(polygon)
-
-        // Remover do ViewModel e do banco de dados
-       /** val polygonData = mapViewModel.polygonsList.value?.find {
-            it.points == polygon.points
-
-        polygonData?.let {
-            mapViewModel.removePolygon(it)
-        }**/
-
-        // Mostrar uma mensagem de confirmação
-        val rootView = findViewById<View>(android.R.id.content)
-        Snackbar.make(rootView, "Polígono removido!", Snackbar.LENGTH_SHORT).show()
-    }
 
 
 

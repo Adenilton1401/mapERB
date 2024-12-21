@@ -142,6 +142,8 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
         }
 
 
+
+
     }
 
     private val _polygonsList = mutableListOf<PolygonData>()
@@ -181,6 +183,19 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
 
     fun removeAllMarkers(){
         _markersList.clear()
+    }
+
+    fun getPolygonData (polygonDataId : String): PolygonData? {
+        var polygonDataFinded: PolygonData? =null
+        val iterator = _polygonsList.iterator()
+        while (iterator.hasNext()){
+            val polygonData = iterator.next()
+            if (polygonData.polygonDataID == polygonDataId){
+                polygonDataFinded = polygonData
+                break
+            }
+        }
+        return polygonDataFinded
     }
 
 

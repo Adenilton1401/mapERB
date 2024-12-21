@@ -5,10 +5,10 @@
     <string name="azimute">Azimute</string>
     <string name="raio">Raio em metros</string>
     <string name="latitude">Latitude</string>
-    <string name="clear">O que gostaria de deletar?</string>
+    <string name="clear">O que gostaria de apagar?</string>
     <string name="btnCancel">Cancelar</string>
     <string name="btnAll">Todos</string>
     <string name="btnLast">Último</string>
-    <string name="Identificador">Identificador</string>
-    <string name="Descricao">Descrição</string>
+    <string name="Identificador">Identificador da ERB</string>
+    <string name="Descricao">Descrição do azimute</string>
 </resources>

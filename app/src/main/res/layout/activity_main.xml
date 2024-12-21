@@ -2,7 +2,6 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -11,76 +10,83 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fbtMenu"
         android:layout_width="56dp"
         android:layout_height="56dp"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="16dp"
         android:backgroundTint="#ffffff"
         android:clickable="true"
         android:focusable="true"
-        android:tint="#000000"
         android:scaleType="center"
-        app:maxImageSize="42dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.078"
         app:layout_constraintStart_toStartOf="parent"
-        app:srcCompat="@drawable/ic_menu_38" />
+        app:maxImageSize="48dp"
+        android:src="@drawable/ic_btn_menu"
+        app:backgroundTint="@null"
+        app:tint="@null"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fbtAddPolygon"
+        android:id="@+id/fbtAddErbAzimuth"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp"
+        android:layout_marginBottom="6dp"
         android:backgroundTint="#ffffff"
         android:clickable="true"
-
         android:scaleType="center"
         android:visibility="invisible"
+        android:src="@drawable/ic_btn_add"
         app:layout_constraintBottom_toTopOf="@+id/fbtMenu"
         app:layout_constraintStart_toStartOf="@+id/fbtMenu"
-        app:maxImageSize="42dp"
-        app:srcCompat="@drawable/ic_draw42" />
+        app:maxImageSize="48dp"
+        app:tint="@null"
+        />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fbtClerPolygon"
+        android:id="@+id/fbtApagar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="6dp"
         android:backgroundTint="#ffffff"
         android:clickable="true"
         android:visibility="invisible"
-        app:layout_constraintBottom_toTopOf="@+id/fbtAddPolygon"
-        app:layout_constraintStart_toStartOf="@+id/fbtAddPolygon"
-        app:maxImageSize="42dp"
-        app:srcCompat="@drawable/ic_clear_42" />
+        app:layout_constraintBottom_toTopOf="@+id/fbtAddErbAzimuth"
+        app:layout_constraintStart_toStartOf="@+id/fbtAddErbAzimuth"
+        app:maxImageSize="48dp"
+        app:srcCompat="@drawable/ic_btn_apagar"
+        app:tint="@null"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fbtSend"
+        android:id="@+id/fbtSalve"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="6dp"
         android:backgroundTint="#ffffff"
         android:clickable="true"
         android:visibility="invisible"
-        app:layout_constraintBottom_toTopOf="@+id/fbtClerPolygon"
-        app:layout_constraintStart_toStartOf="@+id/fbtClerPolygon"
-        app:maxImageSize="36dp"
-        app:srcCompat="@drawable/ic_send_42" />
+        app:layout_constraintBottom_toTopOf="@+id/fbtApagar"
+        app:layout_constraintStart_toStartOf="@+id/fbtApagar"
+        app:maxImageSize="48dp"
+        app:srcCompat="@drawable/ic_btn_salvar"
+        app:tint="@null"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fbtList"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="6dp"
         android:backgroundTint="#ffffff"
         android:clickable="true"
         android:visibility="invisible"
-        app:layout_constraintBottom_toTopOf="@+id/fbtSend"
-        app:layout_constraintStart_toStartOf="@+id/fbtSend"
-        app:maxImageSize="42dp"
-        app:srcCompat="@drawable/ic_list" />
+        app:layout_constraintBottom_toTopOf="@+id/fbtSalve"
+        app:layout_constraintStart_toStartOf="@+id/fbtSalve"
+        app:maxImageSize="48dp"
+        app:srcCompat="@drawable/ic_btn_ajuda"
+        app:tint="@null"/>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

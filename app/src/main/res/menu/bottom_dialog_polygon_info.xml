@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:title="Editar Azimute"
+        android:id="@+id/btnMenuEditAzimuth"
+        android:icon="@drawable/btn_edit_azimuth"/>
+
+    <item android:title="Apagar"
+        android:id="@+id/btnDelete"
+        android:icon="@drawable/ic_btn_apagar"/>
+
+    <item android:title="Endereço Alvo"
+        android:id="@+id/btnMenuAdresstarget"
+        android:icon="@drawable/ic_btn_adress_target"/>
+</menu>

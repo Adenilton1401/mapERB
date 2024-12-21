@@ -11,8 +11,6 @@ import android.widget.Button
 import android.widget.TableLayout
 import android.widget.TableRow
 import android.widget.TextView
-import android.widget.Toast
-import androidx.core.graphics.toColor
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.textfield.TextInputEditText
 import devandroid.adenilton.estudomap.R

@@ -55,7 +55,7 @@ class Util {
             }
 
             // Definir o padrão de formatação
-            val df = DecimalFormat("00.000000")
+            val df = DecimalFormat("0.000000")
             df.isDecimalSeparatorAlwaysShown = true
 
             // Formatar o número

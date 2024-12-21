@@ -6,6 +6,5 @@ data class MarkerData(
     val latLng: LatLng,
     val title: String,
     val snippet: String,
-    val iconId: Int,
-    val description: String// Armazena o ID do recurso do ícone
+    val iconId: Int// Armazena o ID do recurso do ícone
 )

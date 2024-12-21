@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="400dp"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <LinearLayout
+        android:layout_width="350dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/rounded_background"
+        android:padding="16dp">
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tvTitulo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Informações do Azimute"
+            android:textAlignment="center"
+            android:textStyle="bold" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tvAzimuthInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:padding="10dp"
+            android:background="@drawable/border_textview"/>
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tvAzimuthDesciption"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:padding="10dp"
+            android:background="@drawable/border_textview"
+            android:justificationMode="inter_word" />
+
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="130dp"
+            android:columnCount="3"
+            android:rowCount="@integer/material_motion_duration_long_2"
+            android:gravity=""
+            android:layout_marginTop="24dp"
+            android:orientation="horizontal"
+            >
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fabEditAzimuth"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_row="0"
+                android:layout_column="0"
+                android:layout_columnWeight="1"
+                android:layout_gravity="center"
+                android:backgroundTint="#ffffff"
+                android:scaleType="center"
+                android:src="@drawable/btn_edit_azimuth"
+                app:backgroundTint="@null"
+                app:fabCustomSize="65dp"
+                app:maxImageSize="62dp"
+                app:tint="@null" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fabApagarAzimuth"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_row="0"
+                android:layout_column="1"
+                android:layout_columnWeight="1"
+                android:layout_gravity="center"
+                android:backgroundTint="#ffffff"
+                android:scaleType="center"
+                android:src="@drawable/ic_btn_apagar_azimuth"
+                app:backgroundTint="@null"
+                app:fabCustomSize="65dp"
+                app:maxImageSize="55dp"
+                app:tint="@null" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fabAddTarget"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_row="0"
+                android:layout_rowWeight="1"
+                android:layout_column="2"
+                android:layout_columnWeight="1"
+                android:layout_gravity="center"
+                android:backgroundTint="#ffffff"
+                android:gravity="end"
+
+                android:src="@drawable/ic_btn_adress_target"
+                app:backgroundTint="@null"
+                app:fabCustomSize="65dp"
+                app:maxImageSize="60dp"
+                app:tint="@null" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:text="Editar\nAzimute"
+                android:layout_marginTop="4dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center|top"
+                android:gravity="center"
+                android:layout_marginTop="4dp"
+
+                android:text="Apagar"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:layout_marginTop="4dp"
+                android:text="Endereço\nAlvo"/>
+
+        </GridLayout>
+
+
+
+        <Button
+            android:id="@+id/btnOk"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="OK"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_gravity="center"
+            android:backgroundTint="@color/azul_bnt"
+            android:layout_marginTop="24dp"/>
+
+
+
+    </LinearLayout>
+</ScrollView>
