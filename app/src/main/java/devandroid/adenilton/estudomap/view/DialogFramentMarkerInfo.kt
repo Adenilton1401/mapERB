@@ -11,13 +11,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.ImageButton
 import android.widget.TextView
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.material.button.MaterialButton
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textview.MaterialTextView
 import devandroid.adenilton.estudomap.R
@@ -85,12 +84,15 @@ class DialogFragmentMarkerInfo : DialogFragment(){
 
         // Preencha os campos do layout com as informações do marcador
         val tvMarkerInfo = view.findViewById<MaterialTextView>(R.id.tvMarkerLatLng)
-        val tvPolygonInfo = view.findViewById<TextView>(R.id.tvEnderecoERB)
+        val tvEnderecoERB = view.findViewById<TextView>(R.id.tvEnderecoERB)
+        val tvMarkerId = view.findViewById<MaterialTextView>(R.id.tvMarkerId)
 
         val btnOk = view.findViewById<Button>(R.id.btnOk)
 
         val lat = markerPosition?.latitude
         val lng = markerPosition?.longitude
+
+        tvMarkerId.text = "Identificador: "
 
         tvMarkerInfo.text = "Latitude: ${lat?.let { Util.formatCoord(it, "lat") }}\n" +
                 "Longitude: ${lng?.let { Util.formatCoord(it, "long") }}"
@@ -104,13 +106,13 @@ class DialogFragmentMarkerInfo : DialogFragment(){
         viewLifecycleOwner.lifecycleScope.launch {
             if (lat != null && lng != null) {
                 val endereco = Util.obterEndereco(requireContext(), lat, lng)
-                tvPolygonInfo.text = "Endereço: \n${endereco ?: "Endereço não disponível."}"
+                tvEnderecoERB.text = "Endereço: \n${endereco ?: "Endereço não disponível."}"
             } else {
-                tvPolygonInfo.text = "Coordenadas não disponíveis."
+                tvEnderecoERB.text = "Coordenadas não disponíveis."
             }
         }
         //Adiciona o botão para chamar o google Mapas
-        val btnCallGoogleMaps = view.findViewById<ImageButton>(R.id.btnCallGoogleMaps)
+        val btnCallGoogleMaps = view.findViewById<FloatingActionButton>(R.id.fabGoogleMaps)
         btnCallGoogleMaps.setOnClickListener{
             if (lat != null && lng != null) {
                 callGoogleMaps(lat, lng)
@@ -122,7 +124,7 @@ class DialogFragmentMarkerInfo : DialogFragment(){
             }
         }
 
-        val btnAddAzimuth = view.findViewById<MaterialButton>(R.id.btnAddAzimuth)
+        val btnAddAzimuth = view.findViewById<FloatingActionButton>(R.id.fabAddAzimuth)
         btnAddAzimuth.setOnClickListener {
             if (lat != null && lng != null) {
                 val dialogFragmentAddAzimuth = DialogFragmentAddAzimuth.newInstance(lat, lng)

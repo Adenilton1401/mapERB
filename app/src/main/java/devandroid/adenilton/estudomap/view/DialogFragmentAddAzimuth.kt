@@ -27,8 +27,8 @@ class DialogFragmentAddAzimuth : DialogFragment() {
     private var markerPosition: LatLng? = null
 
     companion object {
-        private const val ARG_MARKER_LAT = "marker_lat"
-        private const val ARG_MARKER_LNG = "marker_lng"
+        const val ARG_MARKER_LAT = "marker_lat"
+        const val ARG_MARKER_LNG = "marker_lng"
 
         // Método padrão para criar uma nova instância do DialogFragment com argumentos
         fun newInstance(latitude: Double, longitude: Double): DialogFragmentAddAzimuth {
@@ -190,10 +190,15 @@ class DialogFragmentAddAzimuth : DialogFragment() {
         )
 
 
+
     }
 
     interface OnCloseDialogListener {
         fun onCloseDialogERB()
+    }
+
+    interface OnDataToEditAzimuth{
+
     }
 }
 

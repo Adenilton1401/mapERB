@@ -47,7 +47,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
     DialogFragmentAddPolygon.OnDataSendedListener,
     DialogFragmentAddAzimuth.OnDataSendedListener,
     DialogFragmentAddAzimuth.OnCloseDialogListener,
-    DialogFragmentPolygonInfo.OnDataSendedListener{
+    DialogFragmentPolygonInfo.OnDataSendedListener,
+    DialogFragmentEditAzimuth.OnDataSendedListener {
 
     //Inicio da declaração de variáveis de botões
     private lateinit var fbtMenu: FloatingActionButton
@@ -93,7 +94,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
 
     //--Variáveis para o controle da lista de poligonos
     private var markersOnMap = mutableListOf<Marker>()
-    private  val polygonsOnMap = mutableListOf<Polygon>()
+    private val polygonsOnMap = mutableListOf<Polygon>()
 
     private lateinit var mapViewModel: MapViewModel
 
@@ -126,7 +127,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
             setVisibility(clicked)
             setAnimation(clicked)
             setClickable(clicked)
-           clicked = !clicked
+            clicked = !clicked
         }
 
         // Inicialização do MapView
@@ -144,23 +145,24 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
         val onBackPressedDispatcher = this.onBackPressedDispatcher
 
         // Cria um callback que será chamado quando o botão "voltar" for pressionado.
-        val callback = object : OnBackPressedCallback(true) { // true indica que o callback está habilitado
-            override fun handleOnBackPressed() {
-                if(clicked){ // Verifica se o menu flutuante está aberto
-                    onMenuButtonClicked() // Fecha o menu flutuante
-                }else {// Se o menu flutuante estiver fechado
-                    // Cria um AlertDialog para confirmar o fechamento do app
-                    MaterialAlertDialogBuilder(this@MainActivity)
-                        .setTitle("Fechar o app?")
-                        .setMessage("Tem certeza que deseja sair?")
-                        .setPositiveButton("Sim") { _, _ -> // Define o botão positivo ("Sim")
-                            finish() // Fecha a Activity (encerra o app)
-                        }
-                        .setNegativeButton("Não", null) // Define o botão negativo ("Não")
-                        .show() // Exibe o AlertDialog
+        val callback =
+            object : OnBackPressedCallback(true) { // true indica que o callback está habilitado
+                override fun handleOnBackPressed() {
+                    if (clicked) { // Verifica se o menu flutuante está aberto
+                        onMenuButtonClicked() // Fecha o menu flutuante
+                    } else {// Se o menu flutuante estiver fechado
+                        // Cria um AlertDialog para confirmar o fechamento do app
+                        MaterialAlertDialogBuilder(this@MainActivity)
+                            .setTitle("Fechar o app?")
+                            .setMessage("Tem certeza que deseja sair?")
+                            .setPositiveButton("Sim") { _, _ -> // Define o botão positivo ("Sim")
+                                finish() // Fecha a Activity (encerra o app)
+                            }
+                            .setNegativeButton("Não", null) // Define o botão negativo ("Não")
+                            .show() // Exibe o AlertDialog
+                    }
                 }
             }
-        }
         // Adiciona o callback ao onBackPressedDispatcher.
         // Agora, o callback será chamado quando o botão "voltar" for pressionado.
         onBackPressedDispatcher.addCallback(this, callback)
@@ -185,8 +187,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
         setAnimation(clicked)
         setClickable(clicked)
         clicked = !clicked
-
-
 
 
     }
@@ -242,14 +242,14 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
         override fun onAnimationStart(animation: Animation?) {
             // Desabilita os botões no início da animação
             setClickable(false)
-           // setVisibility(false)
+            // setVisibility(false)
         }
 
         override fun onAnimationEnd(animation: Animation?) {
             // Habilita ou desabilita os botões no final da animação,
             // de acordo com o estado do menu
             setClickable(!clicked)
-          // setVisibility(clicked)
+            // setVisibility(clicked)
         }
 
         override fun onAnimationRepeat(animation: Animation?) {
@@ -294,18 +294,19 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
                 val rootView = findViewById<View>(android.R.id.content)
                 Snackbar.make(rootView, "O mapa já está limpo!", Snackbar.LENGTH_SHORT).show()
 
-            }else
-            showDialogClear()
+            } else
+                showDialogClear()
         }
 
         fbtSend.setOnClickListener {
             if (polygonsOnMap.isEmpty()) { // Verifica se a lista está vazia
                 val rootView = findViewById<View>(android.R.id.content)
-                val snackbar = Snackbar.make(rootView, "Nenhuma ERB e azimute no mapa!", Snackbar.LENGTH_SHORT)
+                val snackbar =
+                    Snackbar.make(rootView, "Nenhuma ERB e azimute no mapa!", Snackbar.LENGTH_SHORT)
                 snackbar.view.textAlignment = View.TEXT_ALIGNMENT_CENTER
                 snackbar.show()
 
-            }else mapViewModel.saveMapAsImage(googleMap)
+            } else mapViewModel.saveMapAsImage(googleMap)
         }
         // Restaurar os polígonos
         for (polygonData in mapViewModel.polygonsList) {
@@ -317,7 +318,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
                 clickable(true)
 
             }
-            googleMap.addPolygon(polygonOptions)?.let{
+            googleMap.addPolygon(polygonOptions)?.let {
                 polygonsOnMap.add(it)
             }
             polygonsOnMap.last().tag = polygonData.polygonDataID
@@ -341,11 +342,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
         }
 
         //-- Ao clicar no marcador será criado um dialigo com informações e opções
-       googleMap.setOnMarkerClickListener { marker ->
-           val latitude = marker.position.latitude
-           val longitude = marker.position.longitude
-           val dialog = DialogFragmentMarkerInfo.newInstance(latitude, longitude)
-           dialog.show(supportFragmentManager, "DialogFragmentMarkerInfo")
+        googleMap.setOnMarkerClickListener { marker ->
+            val latitude = marker.position.latitude
+            val longitude = marker.position.longitude
+            val dialog = DialogFragmentMarkerInfo.newInstance(latitude, longitude)
+            dialog.show(supportFragmentManager, "DialogFragmentMarkerInfo")
 
             true // Retorna true para indicar que o evento de clique foi consumido
         }
@@ -354,12 +355,11 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
         googleMap.setOnPolygonClickListener { polygon ->
             val polygonId = polygon.tag.toString()
             val dialogFragmentPolygonInfo = DialogFragmentPolygonInfo.newInstance(polygonId)
-            dialogFragmentPolygonInfo.show(supportFragmentManager,"DialogFragmentPolygonInfo")
+            dialogFragmentPolygonInfo.show(supportFragmentManager, "DialogFragmentPolygonInfo")
 
-          //  showPolygonOptionsDialog(polygon)
+            //  showPolygonOptionsDialog(polygon)
         }
     }
-
 
 
     private fun showDialogClear() {
@@ -375,7 +375,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
 
 
         btnLast.setOnClickListener {
-            clearSectorPolygon(polygonsOnMap.last())
+            clearSectorPolygon(polygonsOnMap.last(),"Último Azimute apagado!")
 
             dialog.dismiss()
 
@@ -402,7 +402,15 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
     }
 
 
-    private fun drawSectorPolygon(sectorPoints: List<LatLng>, color: Int, identifierERB: String, description: String, azimuth: Double, radiusInMeters: Double) {
+    private fun drawSectorPolygon(
+        sectorPoints: List<LatLng>,
+        color: Int,
+        identifierERB: String,
+        description: String,
+        azimuth: Double,
+        radiusInMeters: Double,
+        centerPoint: LatLng
+    ) {
         var setColor = color
 
         // Verificar se o mapa está inicializado
@@ -416,7 +424,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
             addAll(sectorPoints)
             strokeColor(setColor)
             strokeWidth(2f)
-            fillColor(Color.argb(70,setColor.red,setColor.green,setColor.blue))
+            fillColor(Color.argb(70, setColor.red, setColor.green, setColor.blue))
             clickable(true)
         }
 
@@ -434,13 +442,13 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
             Log.d("MapDebug", "Poligono criado com sucesso")
 
 
-
             val polygonData = PolygonData(
                 uniqueId,
                 sectorPoints,
                 setColor,
                 2f,
-                Color.argb(70, setColor.red,setColor.green,setColor.blue),
+                Color.argb(70, setColor.red, setColor.green, setColor.blue),
+                centerPoint,
                 azimuth,
                 radiusInMeters,
                 description
@@ -452,16 +460,19 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
     }
 
     @SuppressLint("NewApi")
-    private fun clearSectorPolygon(polygon: Polygon) {
+    private fun clearSectorPolygon(polygon: Polygon, message: String) {
         polygonsOnMap.remove(polygon) // Remove o polígono do mapa e da lista na MainActivity
         polygon.remove()
-        markersOnMap.removeLastOrNull()?.remove() // Remove o marcador do mapa e da lista na MainActivity
+        markersOnMap.removeLastOrNull()
+            ?.remove() // Remove o marcador do mapa e da lista na MainActivity
 
         mapViewModel.removePolygon(polygon) // Remove o polígono do ViewModel
         mapViewModel.removeLastMarker() // Remove o marcador do ViewModel
 
-        val rootView = findViewById<View>(android.R.id.content)
-        Snackbar.make(rootView, "Útima ERB e azimute apagado!", Snackbar.LENGTH_SHORT).show()
+        if (message != null) {
+            val rootView = findViewById<View>(android.R.id.content)
+            Snackbar.make(rootView, message, Snackbar.LENGTH_SHORT).show()
+        }
     }
 
     private fun clearAllSectorPolygon() {
@@ -481,9 +492,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
     //Cria um marcador na localização geografica
     private fun addMarker(latLng: LatLng, identifierERB: String) {
         val tIdentifierERB: String
-        if (identifierERB.isNullOrEmpty()){
+        if (identifierERB.isNullOrEmpty()) {
             tIdentifierERB = "ERB"
-        }else{
+        } else {
             tIdentifierERB = identifierERB
         }
         val icon = vectorToBitmap(R.drawable.ic_tower_48)
@@ -522,7 +533,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
         return BitmapDescriptorFactory.fromBitmap(bitmap)
 
     }
-
 
 
     override fun onStart() {
@@ -571,7 +581,6 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
     }
 
 
-
     override fun onDataSended(
         lat: Double,
         lng: Double,
@@ -594,7 +603,15 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
         try {
 
             var polygonPoints = mapViewModel.getSectorPolygonPoints()
-            drawSectorPolygon(polygonPoints, colorToPass,identifier, description, azimuth, radiusInMeters)
+            drawSectorPolygon(
+                polygonPoints,
+                colorToPass,
+                identifier,
+                description,
+                azimuth,
+                radiusInMeters,
+                latLng
+            )
 
             val cameraUpdate =
                 CameraUpdateFactory.newLatLngZoom(mapViewModel.getCenterLocation(), 13.5f)
@@ -608,7 +625,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
 
     override fun onCloseDialogERB() {
         // Fechar ambos os DialogFragments
-        val DialogFragmentMarkerInfo = supportFragmentManager.findFragmentByTag("DialogFragmentMarkerInfo") as? DialogFragment
+        val DialogFragmentMarkerInfo =
+            supportFragmentManager.findFragmentByTag("DialogFragmentMarkerInfo") as? DialogFragment
         DialogFragmentMarkerInfo?.dismiss()
 
 
@@ -616,17 +634,23 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
 
     override fun onDataToRemovePolygon(
         polygonDataID: String
-    ){
-        for (polygon in polygonsOnMap){
-            if(polygon.tag == polygonDataID){
-                clearSectorPolygon(polygon)
-                val DialogFragmentPolygonInfo = supportFragmentManager.findFragmentByTag("DialogFragmentPolygonInfo") as? DialogFragment
-                DialogFragmentPolygonInfo?.dismiss()
+
+    ) {
+        var polygonToRemove: Polygon? = null
+        for (polygon in polygonsOnMap) {
+            if (polygon.tag == polygonDataID) {
+                polygonToRemove = polygon
+
             }
         }
+        if (polygonToRemove != null) {
+            clearSectorPolygon(polygonToRemove, "Azimute apagado!")
+        }
+        val DialogFragmentPolygonInfo =
+            supportFragmentManager.findFragmentByTag("DialogFragmentPolygonInfo") as? DialogFragment
+        DialogFragmentPolygonInfo?.dismiss()
 
     }
-
 
 
     fun Context.setLocale(locale: Locale) {
@@ -636,9 +660,60 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback,
         resources.updateConfiguration(config, resources.displayMetrics)
     }
 
+    override fun onDataEditAzimuth(
+        polygonDataID: String,
+        lat: Double,
+        lng: Double,
+        azimuth: Double,
+        radiusInMeters: Double,
+        identifier: String,
+        description: String,
+        colorToPass: Int
+    ) {
+        var latLng = LatLng(lat, lng)
 
+        mapViewModel.setCenterLocation(latLng)
+        Log.e("MapDebug", "Carregou o CenterLocation com" + latLng)
+        mapViewModel.setAzimuth(azimuth)
+        mapViewModel.setRadiusInMeters(radiusInMeters)
 
+        var polygonToRemove: Polygon? = null
+        for (polygon in polygonsOnMap) {
+            if (polygon.tag == polygonDataID) {
+                polygonToRemove = polygon
+                }
 
+        }
+
+        if (polygonToRemove != null) {
+            clearSectorPolygon(polygonToRemove, "Azimute Atualizado!")
+        }
+
+            try {
+
+                var polygonPoints = mapViewModel.getSectorPolygonPoints()
+                drawSectorPolygon(
+                    polygonPoints,
+                    colorToPass,
+                    identifier,
+                    description,
+                    azimuth,
+                    radiusInMeters,
+                    latLng
+                )
+
+                val cameraUpdate =
+                    CameraUpdateFactory.newLatLngZoom(mapViewModel.getCenterLocation(), 13.5f)
+                googleMap.animateCamera(cameraUpdate)
+
+                val DialogFragmentPolygonInfo =
+                    supportFragmentManager.findFragmentByTag("DialogFragmentPolygonInfo") as? DialogFragment
+                DialogFragmentPolygonInfo?.dismiss()
+
+            } catch (e: Exception) {
+                Log.e("MapDebug", "Erro no onMapReady", e)
+            }
+        }
 
 
 }

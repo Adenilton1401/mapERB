@@ -8,6 +8,7 @@ data class PolygonData(
     val strokeColor: Int,
     val strokeWidth: Float,
     val fillColor: Int,
+    val centerPoint: LatLng,
     val azimuth: Double,
     val radiusInMeters: Double,
     val description: String)

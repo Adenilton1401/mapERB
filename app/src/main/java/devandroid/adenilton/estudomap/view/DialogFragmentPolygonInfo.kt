@@ -104,11 +104,14 @@ class DialogFragmentPolygonInfo: DialogFragment() {
         val btnApagarAzimuth = view.findViewById<FloatingActionButton>(R.id.fabApagarAzimuth)
         val btnOk = view.findViewById<MaterialButton>(R.id.btnOk)
 
-        val azimuth = polygonData?.azimuth
-        tvAzimuthInfo.text = "Azimute: ${azimuth.toString().format().replace(".",",")}"
+        var azimuth = polygonData?.azimuth
+        if (azimuth != null){
+        tvAzimuthInfo.text = "Azimute: ${azimuth.toInt()}"
+        }
 
         val description = polygonData?.description
         tvAzimuthDesciption.text = "Descrição:\n${description}"
+        val polygonDataID = polygonData?.polygonDataID
 
         btnApagarAzimuth.setOnClickListener {
 
@@ -116,7 +119,7 @@ class DialogFragmentPolygonInfo: DialogFragment() {
             builder.setTitle("Confirmação")
             builder.setMessage("Você tem certeza que deseja apagar esse azimute?")
             builder.setPositiveButton("Sim"){ dialog, which ->
-                val polygonDataID = polygonData?.polygonDataID
+
                 if (polygonDataID != null) {
                     listener.onDataToRemovePolygon(polygonDataID)
 
@@ -138,7 +141,10 @@ class DialogFragmentPolygonInfo: DialogFragment() {
         }
 
         btnEditAzimuth.setOnClickListener {
-
+            if (polygonDataID != null) {
+                val dialogFragmentEditAzimuth = DialogFragmentEditAzimuth.newInstance(polygonDataID)
+                dialogFragmentEditAzimuth.show(childFragmentManager, "DialogFragmentEditAzimuth")
+            }
         }
 
         // Configurar o botão OK para fechar o diálogo
